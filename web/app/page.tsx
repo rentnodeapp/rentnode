@@ -1,4 +1,5 @@
 import { Mark } from "./icons.tsx";
+import { HeroTerminal } from "./terminal.tsx";
 
 /* Section numbering, a stat strip, spec rows and dark instrument panels - the
    reference's structure. Every figure below is something the contract does or
@@ -59,7 +60,7 @@ export default function Landing() {
                 <a className="btn" href="#spec">Read the spec</a>
               </div>
             </div>
-            <img className="art" src="/art/art-chip-blueprint.webp" alt="" width={860} height={600} />
+            <HeroTerminal />
           </div>
         </div>
         <div className="wrap" style={{ paddingBottom: 0 }}>
