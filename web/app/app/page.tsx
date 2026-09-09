@@ -104,7 +104,7 @@ function Market({ listings, pick, fmt }: { listings: Listing[]; pick: (i: number
 
   return (
     <>
-      <div className="card" style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 20, padding: "26px 28px" }}>
+      <div className="card mkt-hero">
         <div style={{ minWidth: 0 }}>
           <div className="pill"><span>Metered by the second · settlement only</span></div>
           <h1 className="display" style={{ fontSize: "clamp(28px,3.6vw,40px)", margin: 0 }}>Rent the machine,<br />not the month</h1>
@@ -207,12 +207,14 @@ function Detail({ l, back, fmt, busy, setBusy, send, done, fail, wallet, usdg }:
             ))}
           </div>
           <div className="card" style={{ marginTop: 16 }}>
-            <span className="k">What the chain guarantees</span>
+            <div className="card-head"><span className="k">What the chain guarantees</span><span className="chip warn">off-chain hardware</span></div>
+            <div className="card-pad">
             <p className="kicker" style={{ fontSize: 13.5, marginTop: 8 }}>
               Payment and refunds only. This contract never sees the machine — the spec above is
               a claim its provider makes, not something verified on-chain. Your protection is that
               you can close the lease at any second and take back every unspent cent.
             </p>
+            </div>
           </div>
         </div>
 
@@ -290,6 +292,8 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
       <div>
         <h1 className="display sm" style={{ marginBottom: 16 }}>Your leases ({live.length})</h1>
         <div className="card">
+          <div className="card-head"><span className="k">Running</span><span className="k live">metering</span></div>
+          <div className="card-pad" style={{ gap: 0 }}>
           {live.length === 0 ? <div className="empty">Nothing running right now.</div> : live.map((l) => {
             const used = l.funded > 0 ? Math.min(100, (l.earned / l.funded) * 100) : 0;
             return (
@@ -315,12 +319,14 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
               </div>
             );
           })}
+          </div>
         </div>
 
         {past.length > 0 && (
           <>
             <h2 className="display sm" style={{ fontSize: 20, margin: "26px 0 12px" }}>Closed</h2>
             <div className="card">
+              <div className="card-pad" style={{ gap: 0 }}>
               {past.map((l) => (
                 <div className="line" key={l.id}>
                   <span className="line-art k"><Icon kind={l.kind} /></span>
@@ -331,6 +337,7 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
                   <span className="chip off">Closed</span>
                 </div>
               ))}
+              </div>
             </div>
           </>
         )}
@@ -376,9 +383,11 @@ function Provide({ listings, fmt, busy, setBusy, send, done, fail, wallet }: Com
   return (
     <div className="shell even">
       <div className="card">
-        <h1 className="display sm" style={{ fontSize: 22, marginBottom: 4 }}>List a machine</h1>
-        <p className="kicker" style={{ fontSize: 13, marginBottom: 18 }}>
-          No deposit, no approval. You get paid per second while it runs, and can withdraw at any point.
+        <div className="card-head"><span className="k">List a machine</span><span className="k">no deposit</span></div>
+        <div className="card-pad">
+        <p className="kicker" style={{ margin: 0, fontSize: 14 }}>
+          No deposit, no approval, no queue. You are paid per second while it runs, and can
+          withdraw the earned part at any point without ending the lease.
         </p>
 
         <div className="field">
@@ -402,25 +411,32 @@ function Provide({ listings, fmt, busy, setBusy, send, done, fail, wallet }: Com
         <button className="btn primary wide" disabled={!MARKET || !wallet.address || !!busy || !(Number(price) > 0) || !spec.trim()} onClick={create}>
           {busy ?? (!wallet.address ? "Connect wallet" : "Publish listing")}
         </button>
-        <p className="kicker" style={{ fontSize: 12, marginTop: 12 }}>
-          The endpoint is stored on-chain in the clear. Publish a hostname, never a key or a password.
+        <p className="warn-note">
+          The endpoint is written on-chain in the clear, where anyone can read it. Publish a
+          hostname — never a key, a token or a password.
         </p>
+        </div>
       </div>
 
       <div className="card">
-        <h2 className="display sm" style={{ fontSize: 20, marginBottom: 12 }}>Your listings</h2>
-        {!wallet.address ? <div className="empty">Connect a wallet to see yours.</div>
-          : mine.length === 0 ? <div className="empty">Nothing listed yet.</div>
-          : mine.map((l) => (
-            <div className="line" key={l.id}>
-              <span className="line-art k"><Icon kind={l.kind} /></span>
-              <div className="id">
-                <b>{l.spec.split("/")[0]?.trim() || KINDS[l.kind]}</b>
-                <span>{fmt(l.pricePerHour)}/hr · {KINDS[l.kind]}</span>
+        <div className="card-head">
+          <span className="k">Your listings</span>
+          <span className="k">{mine.length || 0} live</span>
+        </div>
+        <div className="card-pad" style={{ gap: 0 }}>
+          {!wallet.address ? <div className="empty">Connect a wallet to see yours.</div>
+            : mine.length === 0 ? <div className="empty">Nothing listed yet.</div>
+            : mine.map((l) => (
+              <div className="line" key={l.id}>
+                <span className="line-art k"><Icon kind={l.kind} /></span>
+                <div className="id">
+                  <b>{l.spec.split("/")[0]?.trim() || KINDS[l.kind]}</b>
+                  <span>{fmt(l.pricePerHour)}/hr · {KINDS[l.kind]}</span>
+                </div>
+                <span className={`chip ${l.open ? "on" : "off"}`}>{l.open ? "Open" : "Closed"}</span>
               </div>
-              <span className={`tag ${l.open ? "live" : "done"}`}>{l.open ? "Open" : "Closed"}</span>
-            </div>
-          ))}
+            ))}
+        </div>
       </div>
     </div>
   );
