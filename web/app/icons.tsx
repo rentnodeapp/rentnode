@@ -1,74 +1,62 @@
-/* The reference leans on chunky 3D renders of hardware. These are the same
-   objects drawn flat: a solid black body with one lime face, so they read at
-   40px in a card and at 120px on a detail page without a single image request. */
+/* Line engravings rather than 3D renders: hairline strokes on paper, the same
+   register as the rules and the mono labels. Drawn here, so nothing is fetched
+   and nothing belongs to anybody else. */
 
 const KIND_ART = [
-  // GPU - a fan disc on a card body
+  // GPU - a board with a fan
   <g key="gpu">
-    <rect x="6" y="14" width="52" height="36" rx="7" fill="#101212" />
-    <rect x="6" y="14" width="52" height="36" rx="7" fill="none" stroke="#101212" strokeWidth="2" />
-    <circle cx="24" cy="32" r="12" fill="#dcf94f" />
-    <circle cx="24" cy="32" r="4" fill="#101212" />
-    <path d="M24 20a12 12 0 0110.4 6M24 44a12 12 0 01-10.4-6" stroke="#101212" strokeWidth="2" fill="none" strokeLinecap="round" />
-    <rect x="42" y="24" width="10" height="16" rx="2" fill="#3a3f3d" />
-    <path d="M14 50v6M50 50v6" stroke="#101212" strokeWidth="3" strokeLinecap="round" />
+    <rect x="5" y="16" width="54" height="32" />
+    <circle cx="22" cy="32" r="10" />
+    <circle cx="22" cy="32" r="3" />
+    <path d="M22 22a10 10 0 018.7 5M22 42a10 10 0 01-8.7-5" />
+    <rect x="40" y="24" width="12" height="16" />
+    <path d="M13 48v6M51 48v6M5 26H1M5 34H1" />
   </g>,
-  // CPU - a chip with pins
+  // CPU - a die with pins
   <g key="cpu">
-    <rect x="14" y="14" width="36" height="36" rx="6" fill="#101212" />
-    <rect x="22" y="22" width="20" height="20" rx="3" fill="#dcf94f" />
-    <path d="M22 8v6M32 8v6M42 8v6M22 50v6M32 50v6M42 50v6M8 22h6M8 32h6M8 42h6M50 22h6M50 32h6M50 42h6"
-      stroke="#101212" strokeWidth="3" strokeLinecap="round" />
+    <rect x="16" y="16" width="32" height="32" />
+    <rect x="25" y="25" width="14" height="14" />
+    <path d="M24 10v6M32 10v6M40 10v6M24 48v6M32 48v6M40 48v6M10 24h6M10 32h6M10 40h6M48 24h6M48 32h6M48 40h6" />
   </g>,
-  // Storage - a stack of platters
+  // Storage - stacked platters
   <g key="storage">
-    <rect x="8" y="16" width="48" height="12" rx="6" fill="#101212" />
-    <rect x="8" y="30" width="48" height="12" rx="6" fill="#3a3f3d" />
-    <rect x="8" y="44" width="48" height="12" rx="6" fill="#101212" />
-    <circle cx="18" cy="22" r="3" fill="#dcf94f" />
-    <circle cx="18" cy="36" r="3" fill="#dcf94f" />
-    <circle cx="18" cy="50" r="3" fill="#dcf94f" />
+    <rect x="8" y="15" width="48" height="11" rx="5.5" />
+    <rect x="8" y="29" width="48" height="11" rx="5.5" />
+    <rect x="8" y="43" width="48" height="11" rx="5.5" />
+    <circle cx="18" cy="20.5" r="2" /><circle cx="18" cy="34.5" r="2" /><circle cx="18" cy="48.5" r="2" />
   </g>,
-  // Database - the classic cylinder
+  // Database - the cylinder
   <g key="db">
-    <ellipse cx="32" cy="16" rx="20" ry="7" fill="#dcf94f" />
-    <path d="M12 16v32c0 3.9 9 7 20 7s20-3.1 20-7V16" fill="#101212" />
-    <ellipse cx="32" cy="16" rx="20" ry="7" fill="none" stroke="#101212" strokeWidth="2" />
-    <path d="M12 30c0 3.9 9 7 20 7s20-3.1 20-7M12 41c0 3.9 9 7 20 7s20-3.1 20-7"
-      stroke="#dcf94f" strokeWidth="2" fill="none" />
+    <ellipse cx="32" cy="15" rx="19" ry="6.5" />
+    <path d="M13 15v34c0 3.6 8.5 6.5 19 6.5s19-2.9 19-6.5V15" />
+    <path d="M13 27c0 3.6 8.5 6.5 19 6.5s19-2.9 19-6.5M13 38c0 3.6 8.5 6.5 19 6.5s19-2.9 19-6.5" />
   </g>,
 ];
 
 export function Icon({ kind, size = 40 }: { kind: number; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden style={{ display: "block" }}>
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" stroke="currentColor"
+      strokeWidth="1.6" strokeLinecap="square" aria-hidden style={{ display: "block" }}>
       {KIND_ART[kind] ?? KIND_ART[0]}
     </svg>
   );
 }
 
-/** The wordmark: an upward chevron in a rounded square. */
+/** Our own mark: a die with a clock notch, engraved in one weight. */
 export function Mark() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="1.5" y="1.5" width="21" height="21" rx="6.5" fill="#101212" />
-      <path d="M7 14.5 12 9l5 5.5" stroke="#dcf94f" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-export function Plus() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden>
-      <path d="M12 6v12M6 12h12" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" aria-hidden>
+      <rect x="4.5" y="4.5" width="15" height="15" />
+      <rect x="9" y="9" width="6" height="6" />
+      <path d="M8 1.5v3M12 1.5v3M16 1.5v3M8 19.5v3M12 19.5v3M16 19.5v3M1.5 8h3M1.5 12h3M1.5 16h3M19.5 8h3M19.5 12h3M19.5 16h3" />
     </svg>
   );
 }
 
 export function Arrow() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M5 12h13M12 5.5 18.5 12 12 18.5" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" aria-hidden>
+      <path d="M4 12h15M13 6l6 6-6 6" />
     </svg>
   );
 }

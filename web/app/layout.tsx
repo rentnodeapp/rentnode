@@ -1,16 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
+import { Newsreader, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers.tsx";
 import "./globals.css";
 
-/* Manrope carries the references' look: geometric, very tight at display sizes,
-   and it ships a 800 weight for the headline. */
-const sans = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-sans",
-  display: "swap",
-});
+/* An editorial serif for display and body, a technical mono for every label -
+   the pairing the reference uses, and the reason the page reads as a datasheet
+   rather than a product site. */
+const display = Newsreader({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--font-display", display: "swap" });
+const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono", display: "swap" });
 
 const TITLE = "Rent compute, metered by the second";
 const DESCRIPTION =
@@ -24,11 +21,11 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
-export const viewport: Viewport = { themeColor: "#dcf94f", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#efeee6", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={sans.variable}>
+    <html lang="en" className={`${display.variable} ${mono.variable}`}>
       <body>
         <Providers>{children}</Providers>
       </body>
