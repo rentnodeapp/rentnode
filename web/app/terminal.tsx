@@ -52,7 +52,7 @@ export function HeroTerminal() {
     const id = setInterval(() => {
       n++;
       // the command types itself out first, then the meter takes over
-      if (n <= BOOT.length * 4) { setLines(Math.ceil(n / 4)); return; }
+      if (n <= BOOT.length * 2) { setLines(Math.ceil(n / 2)); return; }
       setSecs((s) => (s + SPEED >= FUNDED / RATE ? 0 : s + SPEED));
       setCells((c) => c.map((v) => (Math.random() < 0.14 ? (v ? 0 : 1) : v)));
     }, TICK);

@@ -48,7 +48,7 @@ export default function App() {
   return (
     <div>
       <nav className="nav">
-        <a className="brand" href="/"><Mark />Compute</a>
+        <a className="brand mini" href="/"><Mark /><span>Compute</span></a>
         <div className="nav-links tabs">
             {(["market", "leases", "provide"] as Tab[]).map((t) => (
               <button key={t} className={tab === t ? "on" : ""} onClick={() => { setTab(t); setMsg(null); setPicked(null); }}>
