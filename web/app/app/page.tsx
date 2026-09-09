@@ -123,14 +123,14 @@ function Market({ listings, pick, fmt }: { listings: Listing[]; pick: (i: number
           </div>
           <div className="grp">
             <span className="k">Category</span>
-            <div className="seg">
+            <div className="seg col">
               <button className={kind < 0 ? "on" : ""} onClick={() => setKind(-1)}>All</button>
               {KINDS.map((k, i) => <button key={k} className={kind === i ? "on" : ""} onClick={() => setKind(i)}>{k}</button>)}
             </div>
           </div>
           <div className="grp">
             <span className="k">Sort by</span>
-            <div className="seg">
+            <div className="seg col">
               {([["new", "Newest"], ["cheap", "Cheapest"], ["dear", "Priciest"]] as const).map(([v, l]) => (
                 <button key={v} className={sort === v ? "on" : ""} onClick={() => setSort(v)}>{l}</button>
               ))}
@@ -147,8 +147,19 @@ function Market({ listings, pick, fmt }: { listings: Listing[]; pick: (i: number
         <section>
           <div className="count">Showing {rows.length} of {listings.length} machines</div>
           {rows.length === 0 ? (
-            <div className="card empty">
-              Nothing listed yet. Anyone can add a machine from the <b>Provide</b> tab — there is no gatekeeper and no deposit.
+            <div className="card">
+              <div className="card-head"><span className="k">Empty shelf</span><span className="k">0 machines</span></div>
+              <div className="card-pad" style={{ gap: 18, padding: "34px 28px" }}>
+                <p className="kicker" style={{ margin: 0, fontSize: 16, maxWidth: "46ch" }}>
+                  Nothing is listed yet. Anyone can put a machine here — there is no gatekeeper,
+                  no deposit and no approval queue.
+                </p>
+                <div className="specs" style={{ maxWidth: 520 }}>
+                  <div className="spec"><span>To list</span><b>One transaction of gas</b></div>
+                  <div className="spec"><span>You are paid</span><b>Per second, while it runs</b></div>
+                  <div className="spec"><span>Withdraw</span><b>Any time, without ending the lease</b></div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="grid">

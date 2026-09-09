@@ -193,14 +193,16 @@ em { font-style: italic; }
 .inp .unit { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
 
 /* segmented row of mono choices */
-.seg { display: flex; flex-wrap: wrap; border: var(--rule); }
+.seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 1.5px; background: var(--ink); border: var(--rule); }
+.seg.col { grid-template-columns: 1fr; }
 .seg button {
-  flex: 1 1 auto; min-width: 72px; border: 0; border-right: var(--rule); background: transparent;
+  border: 0; background: var(--paper);
   font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
   padding: 11px 8px; transition: background .14s, color .14s;
 }
-.seg button:last-child { border-right: 0; }
+
 .seg button:hover { background: var(--paper-2); }
+.seg.col button { text-align: left; padding-left: 14px; }
 .seg button.on { background: var(--ink); color: var(--paper); }
 
 .step { display: inline-flex; align-items: center; border: var(--rule); }
@@ -376,7 +378,7 @@ em { font-style: italic; }
 @media (max-width: 900px) { .nav-links.tabs + .burger { display: none; } }
 
 /* the market's opening strip */
-.mkt-hero { padding: 26px 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 20px; }
+.mkt-hero { padding: 30px 32px; display: flex; flex-direction: row; align-items: center; gap: 28px; margin-bottom: 20px; }
 .mkt-hero > div { min-width: 0; }
 .mkt-hero .pill { margin-bottom: 16px; }
 @media (max-width: 640px) { .mkt-hero { padding: 20px; gap: 16px; } .mkt-hero svg { display: none; } }
