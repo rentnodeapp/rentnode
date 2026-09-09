@@ -49,7 +49,7 @@ export default function App() {
     <div>
       <nav className="nav">
         <a className="brand" href="/"><Mark />Compute</a>
-        <div className="nav-links">
+        <div className="nav-links tabs">
             {(["market", "leases", "provide"] as Tab[]).map((t) => (
               <button key={t} className={tab === t ? "on" : ""} onClick={() => { setTab(t); setMsg(null); setPicked(null); }}>
                 {t === "market" ? "Market" : t === "leases" ? `Leases${open.length ? ` (${open.length})` : ""}` : "Provide"}
@@ -195,7 +195,7 @@ function Detail({ l, back, fmt, busy, setBusy, send, done, fail, wallet, usdg }:
   return (
     <>
       <button className="btn sm" onClick={back} style={{ marginBottom: 18 }}>← Back to market</button>
-      <div className="shell" style={{ gridTemplateColumns: "1.15fr .85fr" }}>
+      <div className="shell detail">
         <div>
           <div className="card" style={{ display: "grid", placeItems: "center", minHeight: 260, marginBottom: 16 }}>
             <Icon kind={l.kind} size={120} />
@@ -286,7 +286,7 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
   const held = live.reduce((s, l) => s + l.refundable, 0);
 
   return (
-    <div className="shell" style={{ gridTemplateColumns: "1fr 320px" }}>
+    <div className="shell aside">
       <div>
         <h1 className="display sm" style={{ marginBottom: 16 }}>Your leases ({live.length})</h1>
         <div className="card">
@@ -374,7 +374,7 @@ function Provide({ listings, fmt, busy, setBusy, send, done, fail, wallet }: Com
   };
 
   return (
-    <div className="shell" style={{ gridTemplateColumns: "1fr 1fr" }}>
+    <div className="shell even">
       <div className="card">
         <h1 className="display sm" style={{ fontSize: 22, marginBottom: 4 }}>List a machine</h1>
         <p className="kicker" style={{ fontSize: 13, marginBottom: 18 }}>

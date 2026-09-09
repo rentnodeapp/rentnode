@@ -27,6 +27,17 @@ const BOOT = [
 const pad = (n: number) => String(Math.floor(n)).padStart(2, "0");
 const clock = (s: number) => `${pad(s / 3600)}:${pad((s % 3600) / 60)}:${pad(s % 60)}`;
 
+/** true once mounted, and false forever if the reader asked for less motion. */
+function useTicker(ms: number): number {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { setN(140); return; }
+    const id = setInterval(() => setN((v) => v + 1), ms);
+    return () => clearInterval(id);
+  }, [ms]);
+  return n;
+}
+
 export function HeroTerminal() {
   const [lines, setLines] = useState(0);
   const [secs, setSecs] = useState(0);
@@ -84,6 +95,95 @@ export function HeroTerminal() {
         {/* 96 cores, lighting at random - the only decorative part of the panel */}
         <div className="term-grid" aria-hidden>
           {cells.map((v, i) => <i key={i} className={v ? "on" : ""} />)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- supply
+
+   A provider's shelf, earning. Four machines accrue at their own rate; every
+   so often one is claimed and its earned column drops back to zero, which is
+   exactly what claim() does - it withdraws without ending the lease. */
+
+const SHELF: [string, string, number][] = [
+  ["RTX 4090", "24GB / eu-central", 0.00100],
+  ["EPYC 9354", "32C / us-east", 0.00042],
+  ["NVMe pool", "8TB / ap-south", 0.00013],
+  ["Postgres 16", "4vCPU / eu-west", 0.00027],
+];
+
+export function SupplyPanel() {
+  const n = useTicker(110);
+  return (
+    <div className="term">
+      <div className="card-head">
+        <span className="k">Provider ledger · demonstration</span>
+        <span className="k live">accruing</span>
+      </div>
+      <div className="term-body">
+        {SHELF.map(([name, spec, rate], i) => {
+          // each row claims on its own cycle, so the panel is never in lockstep
+          const cycle = 190 + i * 47;
+          const held = (n % cycle) * 46 * rate;
+          const justClaimed = n % cycle < 6;
+          return (
+            <div className={`led${justClaimed ? " flash" : ""}`} key={name}>
+              <div className="led-id">
+                <b>{name}</b>
+                <span>{spec}</span>
+              </div>
+              <div className="led-rate">{rate.toFixed(5)}<i>/sec</i></div>
+              <div className="led-earn">{justClaimed ? "claimed →" : held.toFixed(6)}</div>
+            </div>
+          );
+        })}
+        <div className="term-note">
+          <span>earnings withdraw without ending a lease</span>
+          <span>no deposit · no vetting</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------ settlement
+
+   The invariant the fuzz test proves, drawn: escrow splits into earned and
+   refundable, the split point walks forward with the clock, and the two halves
+   always add back to the whole. Nothing is ever stranded in the contract. */
+
+export function SettlementPanel() {
+  const n = useTicker(100);
+  const pos = (n % 150) / 150; // 0 → 1, then a new lease
+  const earned = 14.4 * pos;
+  const refund = 14.4 - earned;
+  return (
+    <div className="term">
+      <div className="card-head">
+        <span className="k">Settlement · always sums to the escrow</span>
+        <span className="k live">14.400000 USDG</span>
+      </div>
+      <div className="term-body">
+        <div className="set-bar">
+          <i className="set-earn" style={{ width: `${pos * 100}%` }} />
+          <i className="set-mark" style={{ left: `${pos * 100}%` }} />
+        </div>
+        <div className="set-legend">
+          <div><span>Earned → provider</span><b>{earned.toFixed(6)}</b></div>
+          <div className="r"><span>Refunded → renter</span><b>{refund.toFixed(6)}</b></div>
+        </div>
+        <div className="set-sum">
+          <span>{earned.toFixed(6)}</span>
+          <span className="op">+</span>
+          <span>{refund.toFixed(6)}</span>
+          <span className="op">=</span>
+          <b>14.400000</b>
+        </div>
+        <div className="term-note">
+          <span>close() pays both sides in one transaction</span>
+          <span>contract balance after: 0.000000</span>
         </div>
       </div>
     </div>

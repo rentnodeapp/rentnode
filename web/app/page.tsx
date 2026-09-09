@@ -1,5 +1,5 @@
 import { Mark } from "./icons.tsx";
-import { HeroTerminal } from "./terminal.tsx";
+import { HeroTerminal, SupplyPanel, SettlementPanel } from "./terminal.tsx";
 
 /* Section numbering, a stat strip, spec rows and dark instrument panels - the
    reference's structure. Every figure below is something the contract does or
@@ -46,7 +46,7 @@ export default function Landing() {
       {/* ---- hero ---- */}
       <header className="hero-wrap" style={{ borderBottom: "var(--rule)" }}>
         <div className="wrap" style={{ padding: "clamp(36px,5vw,72px) var(--gutter) clamp(40px,6vw,80px)" }}>
-          <div className="g2" style={{ gridTemplateColumns: "minmax(0,6fr) minmax(0,5fr)", gap: "clamp(28px,4vw,64px)" }}>
+          <div className="g2 hero">
             <div>
               <div className="pill"><span>LIVE · CHAIN 4663 · SETTLEMENT ONLY</span></div>
               <h1 className="display lg">Rent the machine,<br />pay by the <em>second</em>.</h1>
@@ -112,7 +112,7 @@ export default function Landing() {
             </p>
           </div>
           <div className="g2" style={{ gap: 18 }}>
-            <img className="art" src="/art/art-factory-line.webp" alt="" width={860} height={560} />
+            <SupplyPanel />
             <div className="panel">
               <div className="card-head"><span className="k">Provider ledger</span><span className="k live">metered</span></div>
               <div style={{ padding: 20 }}>
@@ -145,7 +145,7 @@ export default function Landing() {
             <div className="specs">
               {SPECS.map(([k, v]) => <div className="spec" key={k}><span>{k}</span><b>{v}</b></div>)}
             </div>
-            <img className="art" src="/art/art-engraving-rig.webp" alt="" width={860} height={560} />
+            <SettlementPanel />
           </div>
         </div>
       </section>
