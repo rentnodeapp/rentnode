@@ -7,6 +7,7 @@ import { makeFormat } from "../../src/money.ts";
 import { MARKET, USDG, USDG_DECIMALS, KINDS, marketAbi, erc20ApproveAbi, humanDuration } from "../../src/market.ts";
 import type { Listing, Lease } from "../api/market/route.ts";
 import { Icon, Mark, Arrow } from "../icons.tsx";
+import { Typed } from "../type.tsx";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 type Tab = "market" | "leases" | "provide";
@@ -107,10 +108,10 @@ function Market({ listings, pick, fmt }: { listings: Listing[]; pick: (i: number
       <div className="card mkt-hero">
         <div style={{ minWidth: 0 }}>
           <div className="pill"><span>Metered by the second · settlement only</span></div>
-          <h1 className="display" style={{ fontSize: "clamp(28px,3.6vw,40px)", margin: 0 }}>Rent the machine,<br />not the month</h1>
+          <h1 className="display" style={{ fontSize: "clamp(28px,3.6vw,40px)", margin: 0 }}><Typed text="Rent the machine," />{" "}<br /><Typed text="not the month" delay={420} cursor /></h1>
         </div>
         <span className="sp" />
-        <Icon kind={0} size={92} />
+        <Icon kind={0} size={92} i={2} />
       </div>
 
       <div className="shell">
@@ -166,7 +167,7 @@ function Market({ listings, pick, fmt }: { listings: Listing[]; pick: (i: number
               {rows.map((l) => (
                 <button className="tile" key={l.id} onClick={() => pick(l.id)}>
                   <span className={`chip ${l.open ? "on" : "off"} hot`}>{l.open ? KINDS[l.kind] : "Closed"}</span>
-                  <span className="tile-art k"><Icon kind={l.kind} /></span>
+                  <span className="tile-art k"><Icon kind={l.kind} i={l.id} /></span>
                   <h4>{l.spec.split("/")[0]?.trim() || KINDS[l.kind]}</h4>
                   <p className="sub">{l.spec}</p>
                   <div className="tile-foot">
@@ -209,7 +210,7 @@ function Detail({ l, back, fmt, busy, setBusy, send, done, fail, wallet, usdg }:
       <div className="shell detail">
         <div>
           <div className="card" style={{ display: "grid", placeItems: "center", minHeight: 260, marginBottom: 16 }}>
-            <Icon kind={l.kind} size={120} />
+            <Icon kind={l.kind} size={120} i={1} />
           </div>
           <span className="k" style={{ display: "block", marginBottom: 8 }}>Specification</span>
           <div className="specs">
@@ -301,7 +302,7 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
   return (
     <div className="shell aside">
       <div>
-        <h1 className="display sm" style={{ marginBottom: 16 }}>Your leases ({live.length})</h1>
+        <h1 className="display sm" style={{ marginBottom: 16 }}><Typed text="Your leases" /> ({live.length})</h1>
         <div className="card">
           <div className="card-head"><span className="k">Running</span><span className="k live">metering</span></div>
           <div className="card-pad" style={{ gap: 0 }}>
@@ -309,7 +310,7 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
             const used = l.funded > 0 ? Math.min(100, (l.earned / l.funded) * 100) : 0;
             return (
               <div className="line" key={l.id} style={{ alignItems: "flex-start" }}>
-                <span className="line-art k"><Icon kind={l.kind} /></span>
+                <span className="line-art k"><Icon kind={l.kind} i={l.id} /></span>
                 <div className="id">
                   <b>{l.spec.split("/")[0]?.trim() || KINDS[l.kind]}</b>
                   <span>{fmt(l.pricePerHour)}/hr · {humanDuration(l.runway)} left · to {short(l.provider)}</span>
@@ -340,7 +341,7 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
               <div className="card-pad" style={{ gap: 0 }}>
               {past.map((l) => (
                 <div className="line" key={l.id}>
-                  <span className="line-art k"><Icon kind={l.kind} /></span>
+                  <span className="line-art k"><Icon kind={l.kind} i={l.id} /></span>
                   <div className="id">
                     <b>{l.spec.split("/")[0]?.trim() || KINDS[l.kind]}</b>
                     <span>ran {humanDuration(l.closedAt - l.startAt)} · paid {fmt(l.earned)}</span>
@@ -439,7 +440,7 @@ function Provide({ listings, fmt, busy, setBusy, send, done, fail, wallet }: Com
             : mine.length === 0 ? <div className="empty">Nothing listed yet.</div>
             : mine.map((l) => (
               <div className="line" key={l.id}>
-                <span className="line-art k"><Icon kind={l.kind} /></span>
+                <span className="line-art k"><Icon kind={l.kind} i={l.id} /></span>
                 <div className="id">
                   <b>{l.spec.split("/")[0]?.trim() || KINDS[l.kind]}</b>
                   <span>{fmt(l.pricePerHour)}/hr · {KINDS[l.kind]}</span>

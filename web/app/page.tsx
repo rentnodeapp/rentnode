@@ -1,5 +1,6 @@
 import { Mark } from "./icons.tsx";
 import { SiteNav } from "./nav.tsx";
+import { Typed } from "./type.tsx";
 import { HeroTerminal, SupplyPanel, SettlementPanel } from "./terminal.tsx";
 
 /* Section numbering, a stat strip, spec rows and dark instrument panels - the
@@ -42,7 +43,7 @@ export default function Landing() {
           <div className="g2 hero">
             <div>
               <div className="pill"><span>LIVE · CHAIN 4663 · SETTLEMENT ONLY</span></div>
-              <h1 className="display lg">Rent the machine,{" "}<br />pay by the <em>second</em>.</h1>
+              <h1 className="display lg"><Typed text="Rent the machine," /> <br /><Typed text="pay by the " delay={430} /><em><Typed text="second." delay={720} cursor /></em></h1>
               <p className="kicker">
                 GPUs, CPUs, disks and databases from whoever has them spare. Escrow USDG, and
                 the money moves to the provider one second at a time. Stop whenever it stops
@@ -69,7 +70,7 @@ export default function Landing() {
           <div className="sec-head">
             <div>
               <div className="pill"><span>§01 — The mechanism</span></div>
-              <h2 className="display">Four steps, and none of them{" "}<br />need a middleman.</h2>
+              <h2 className="display">Four steps, and none of them need a middleman.</h2><i className="wipe" />
             </div>
             <p>
               A marketplace like this normally needs an arbiter to settle &ldquo;the box was
@@ -96,7 +97,7 @@ export default function Landing() {
           <div className="sec-head">
             <div>
               <div className="pill"><span>§02 — Supply</span></div>
-              <h2 className="display">Anyone can put a{" "}<br />machine on the shelf.</h2>
+              <h2 className="display">Anyone can put a machine on the shelf.</h2><i className="wipe" />
             </div>
             <p>
               There is no deposit and no vetting, because a deposit only gates entry unless
@@ -125,7 +126,7 @@ export default function Landing() {
           <div className="sec-head">
             <div>
               <div className="pill"><span>§03 — Datasheet</span></div>
-              <h2 className="display">What the contract{" "}<br />actually does.</h2>
+              <h2 className="display">What the contract actually does.</h2><i className="wipe" />
             </div>
             <p>
               Six functions: <span className="mono">list</span>, <span className="mono">updateListing</span>,{" "}
@@ -149,7 +150,7 @@ export default function Landing() {
           <div className="sec-head">
             <div>
               <div className="pill"><span>§04 — The line</span></div>
-              <h2 className="display">It settles money.{" "}<br />It does not run <em>machines</em>.</h2>
+              <h2 className="display">It settles money. It does not run <em>machines</em>.</h2><i className="wipe" />
             </div>
             <p>
               Worth saying plainly, because most marketplaces bury it: this contract has no way
