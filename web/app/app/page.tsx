@@ -60,12 +60,18 @@ export default function App() {
         <span style={{ marginLeft: 18 }}>
           {wallet.address
             ? <button className="btn sm" onClick={() => wallet.disconnect()}>{short(wallet.address)}</button>
-            : <button className="btn sm primary" onClick={() => void wallet.connect()} disabled={wallet.busy}>{wallet.busy ? "…" : "Connect"}</button>}
+            : wallet.unavailable
+              ? <a className="btn sm" href="https://metamask.io/download/" target="_blank" rel="noreferrer">Get a wallet</a>
+              : <button className="btn sm primary" onClick={() => void wallet.connect()} disabled={wallet.busy}>{wallet.busy ? "…" : "Connect"}</button>}
         </span>
       </nav>
 
       <main className="wrap" style={{ paddingTop: 34, paddingBottom: 90 }}>
         {msg && <div className={`msg ${msg.ok ? "ok" : "err"}`}>{msg.text}</div>}
+        {wallet.error && <div className="msg err">{wallet.error}</div>}
+        {wallet.address && !wallet.chainOk && (
+          <div className="msg err">Your wallet is on another network. Switch it to RH Chain to sign anything here.</div>
+        )}
         {data && !data.deployed && (
           <div className="msg err">The marketplace contract isn&apos;t deployed yet — the shelf fills the moment it is.</div>
         )}
