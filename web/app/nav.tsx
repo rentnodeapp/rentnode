@@ -28,7 +28,7 @@ export function SiteNav() {
   return (
     <>
       <nav className="nav">
-        <a className="brand" href="/"><Mark /><span>Compute</span></a>
+        <a className="brand" href="/"><Mark /><span>Rentnode</span></a>
 
         <div className="nav-links">
           {LINKS.map(([href, label]) => <a key={href} href={href}>{label}</a>)}

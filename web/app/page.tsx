@@ -188,7 +188,7 @@ export default function Landing() {
 
       <footer className="foot">
         <div className="wrap foot-in">
-          <span className="brand"><Mark />Compute</span>
+          <span className="brand"><Mark />Rentnode</span>
           <span className="sp" />
           <span>Non-custodial · no owner · no fee · no pause switch</span>
         </div>

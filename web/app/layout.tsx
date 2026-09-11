@@ -9,14 +9,14 @@ import "./globals.css";
 const display = Newsreader({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--font-display", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono", display: "swap" });
 
-const TITLE = "Rent compute, metered by the second";
+const TITLE = "Rentnode - rent compute, metered by the second";
 const DESCRIPTION =
   "List a GPU, CPU, disk or database and get paid per second. Renters escrow USDG and can stop any time - every unspent cent comes back. Settled on RH Chain.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  applicationName: "Compute Market",
+  applicationName: "Rentnode",
   openGraph: { type: "website", title: TITLE, description: DESCRIPTION, url: "/" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
