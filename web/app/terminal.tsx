@@ -17,10 +17,10 @@ const SPEED = 46; // lease-seconds per tick, so the meter is visible
 const TICK = 90; // ms
 
 const BOOT = [
-  "$ compute rent --listing 3 --hours 4",
+  "$ rentnode rent --listing 3 --hours 4",
   "→ escrow  14.400000 USDG  accepted",
   "→ rate    0.001000 USDG/sec",
-  "→ host    ssh://box.eu-central-1:22",
+  "→ host    ssh://box.eu-central-1:22  [RTX 4090 · 24GB · CUDA 12.4]",
   "→ metering started at block 4663",
 ];
 
@@ -41,7 +41,7 @@ function useTicker(ms: number): number {
 export function HeroTerminal() {
   const [lines, setLines] = useState(0);
   const [secs, setSecs] = useState(0);
-  const [cells, setCells] = useState<number[]>(() => Array(96).fill(0));
+  const [cells, setCells] = useState<number[]>(() => Array(128).fill(0));
   const still = useRef(false);
 
   useEffect(() => {
@@ -92,11 +92,42 @@ export function HeroTerminal() {
           <span>stop now → {left.toFixed(6)} USDG returned</span>
         </div>
 
-        {/* 96 cores, lighting at random - the only decorative part of the panel */}
-        <div className="term-grid" aria-hidden>
-          {cells.map((v, i) => <i key={i} className={v ? "on" : ""} />)}
+        {/* telemetry the way a real card reports it - illustrative values,
+            but the shape is nvidia-smi's, not a marketing dashboard's */}
+        <Telemetry n={secs} />
+
+        {/* the die: 128 streaming multiprocessors, lighting by load */}
+        <div className="term-die" aria-hidden>
+          <div className="term-die-h"><span>SM ARRAY · 128</span><span>{Math.round(cells.filter(Boolean).length / cells.length * 100)}% ACTIVE</span></div>
+          <div className="term-grid">
+            {cells.map((v, i) => <i key={i} className={v ? "on" : ""} style={{ opacity: v ? 0.55 + ((i * 7) % 5) * 0.09 : 1 }} />)}
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** GPU telemetry rows: bar, value, unit. Jitter is deterministic from the
+ *  tick so the panel is lively without being random on every render. */
+function Telemetry({ n }: { n: number }) {
+  const j = (k: number, amp: number) => Math.sin(n / 37 + k) * amp;
+  const rows: [string, number, number, string][] = [
+    ["GPU UTIL", 71 + j(1, 18), 100, "%"],
+    ["VRAM", 17.2 + j(2, 1.4), 24, "GB"],
+    ["SM CLOCK", 2415 + j(3, 60), 2520, "MHz"],
+    ["TEMP", 63 + j(4, 4), 90, "°C"],
+    ["POWER", 318 + j(5, 40), 450, "W"],
+  ];
+  return (
+    <div className="term-tele">
+      {rows.map(([k, v, max, u]) => (
+        <div key={k}>
+          <span>{k}</span>
+          <i><b style={{ width: `${Math.min(100, (v / max) * 100)}%` }} /></i>
+          <em>{u === "GB" ? v.toFixed(1) : Math.round(v)}<small>{u}</small></em>
+        </div>
+      ))}
     </div>
   );
 }

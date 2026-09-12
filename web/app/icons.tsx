@@ -45,13 +45,8 @@ export function Icon({ kind, size = 40, i = 0, still }: { kind: number; size?: n
 
 /** Our own mark: a die with a clock notch, engraved in one weight. */
 export function Mark() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" aria-hidden>
-      <rect x="4.5" y="4.5" width="15" height="15" pathLength={1} />
-      <rect x="9" y="9" width="6" height="6" pathLength={1} />
-      <path d="M8 1.5v3M12 1.5v3M16 1.5v3M8 19.5v3M12 19.5v3M16 19.5v3M1.5 8h3M1.5 12h3M1.5 16h3M19.5 8h3M19.5 12h3M19.5 16h3" pathLength={1} />
-    </svg>
-  );
+  // eslint-disable-next-line @next/next/no-img-element -- static 256px mark
+  return <img src="/logo.png" alt="" width={26} height={26} style={{ display: "block", borderRadius: 6 }} />;
 }
 
 export function Arrow() {
