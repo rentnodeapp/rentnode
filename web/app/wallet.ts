@@ -15,6 +15,8 @@ export interface Wallet {
   connect: () => Promise<void>;
   disconnect: () => void;
   send: (tx: { to: Address; data: `0x${string}`; value?: bigint }) => Promise<`0x${string}`>;
+  /** personal_sign a plain message - how a renter proves to a relay who they are. */
+  sign: (message: string) => Promise<`0x${string}`>;
 }
 
 const CHAIN_CAIP = `eip155:${robinhoodChain.id}`;
@@ -132,11 +134,18 @@ function useInjectedWallet(): Wallet {
     return client.sendTransaction({ to: tx.to, data: tx.data, value: tx.value ?? 0n });
   }, [address, chainOk, toChain]);
 
+  const sign = useCallback(async (message: string) => {
+    const p = injected();
+    if (!p || !address) throw new Error("Connect a wallet first");
+    const client = createWalletClient({ account: address, chain: robinhoodChain, transport: custom(p) });
+    return client.signMessage({ message });
+  }, [address]);
+
   return useMemo(() => ({
     address, chainOk, busy, error,
     unavailable: checked && !injected(),
-    connect, disconnect, send,
-  }), [address, chainOk, busy, error, checked, connect, disconnect, send]);
+    connect, disconnect, send, sign,
+  }), [address, chainOk, busy, error, checked, connect, disconnect, send, sign]);
 }
 
 // --------------------------------------------------------------------- privy
@@ -177,9 +186,16 @@ function usePrivyWallet(): Wallet {
     return client.sendTransaction({ to: tx.to, data: tx.data, value: tx.value ?? 0n });
   }, [wallet, address]);
 
+  const sign = useCallback(async (message: string) => {
+    if (!wallet || !address) throw new Error("Connect a wallet first");
+    const provider = await wallet.getEthereumProvider();
+    const client = createWalletClient({ account: address, chain: robinhoodChain, transport: custom(provider) });
+    return client.signMessage({ message });
+  }, [wallet, address]);
+
   return useMemo(() => ({
-    address, chainOk, busy: !ready || switching, unavailable: false, error, connect, disconnect, send,
-  }), [address, chainOk, ready, switching, error, connect, disconnect, send]);
+    address, chainOk, busy: !ready || switching, unavailable: false, error, connect, disconnect, send, sign,
+  }), [address, chainOk, ready, switching, error, connect, disconnect, send, sign]);
 }
 
 /** Wallet errors arrive as provider dumps; turn the common ones into English. */

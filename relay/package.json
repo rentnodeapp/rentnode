@@ -1,0 +1,9 @@
+{
+  "name": "rentnode-relay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fulfils Rentnode leases with real Vast.ai instances and mirrors Vast's catalogue onto the shelf.",
+  "scripts": { "start": "node index.mjs" },
+  "dependencies": { "viem": "^2.21.0" }
+}

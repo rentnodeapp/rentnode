@@ -389,6 +389,39 @@ function Detail({ l, back, fmt, busy, setBusy, send, done, fail, wallet, usdg }:
   );
 }
 
+// ------------------------------------------------------------------ access
+
+/** For leases whose listing endpoint is a relay URL: sign a short message with
+ *  the renting wallet and fetch the ssh details. The relay checks the signer
+ *  against lease.renter on-chain, so nobody else can pull them. */
+function Access({ l, wallet }: { l: Lease; wallet: ReturnType<typeof useWallet> }) {
+  const [out, setOut] = useState<{ host?: string; port?: number; user?: string; privateKey?: string; status?: string; error?: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const fetchAccess = async () => {
+    setBusy(true); setOut(null);
+    try {
+      const msg = `rentnode lease ${l.id} ${Math.floor(Date.now() / 60000)}`;
+      const sig = await wallet.sign(msg);
+      const r = await fetch(`${l.endpoint.replace(/\/$/, "")}/${l.id}`, { headers: { "x-sig": sig, "x-msg": msg } });
+      setOut(await r.json());
+    } catch (e) { setOut({ error: e instanceof Error ? e.message : String(e) }); }
+    finally { setBusy(false); }
+  };
+  return (
+    <div className="access">
+      <button className="btn sm mint" disabled={busy} onClick={fetchAccess}>{busy ? "…" : out?.host ? "Refresh access" : "Get access"}</button>
+      {out?.error && <span className="k" style={{ color: "var(--rose)" }}>{out.error}</span>}
+      {out?.status && <span className="k">{out.status} — try again in 30s</span>}
+      {out?.host && (
+        <div className="access-out">
+          <div className="spec"><span>ssh</span><b className="mono">ssh -i lease-{l.id}.key -p {out.port} {out.user}@{out.host}</b></div>
+          <details><summary className="k">private key · save as lease-{l.id}.key, chmod 600</summary><pre className="code">{out.privateKey}</pre></details>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ------------------------------------------------------------------ leases
 
 function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common & { leases: Lease[] }) {
@@ -446,6 +479,7 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
                     <button className="btn sm" disabled={!!busy || !(Number(topping[l.id]) > 0)} onClick={() => top(l.id)}>Add</button>
                     <button className="btn sm" disabled={!!busy} onClick={() => act("Closing…", "close", l.id)}>{busy ?? "Stop & refund"}</button>
                   </div>
+                  {/^https?:\/\//.test(l.endpoint) && <Access l={l} wallet={wallet} />}
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <b style={{ fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{fmt(l.refundable)}</b>

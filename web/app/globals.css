@@ -571,3 +571,11 @@ em { font-style: italic; }
 .filters-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .filters-row .seg { min-width: 0; display: flex; }
 .filters-row .seg button { padding: 9px 12px; min-width: 0; }
+
+/* relay access hand-over on a running lease */
+.access { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: var(--hair); }
+.access > .btn { align-self: flex-start; }
+.access-out .spec { grid-template-columns: 50px 1fr; }
+.access-out details { margin-top: 6px; }
+.access-out summary { cursor: pointer; list-style: none; }
+.access-out .code { font-size: 10.5px; margin-top: 8px; padding: 12px; background: var(--panel); border: var(--hair); }
