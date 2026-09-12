@@ -10,29 +10,49 @@ import { Icon, Mark, Arrow } from "../icons.tsx";
 import { Typed } from "../type.tsx";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
-type Tab = "market" | "leases" | "provide";
+type Tab = "overview" | "market" | "leases" | "provide";
+
+/* The console: a fixed rail on the left, a breadcrumb bar, a KPI strip, and
+   the working surface. Everything on it is a contract read; the only numbers
+   that are not are labelled as such. */
+
+const NAV: { group: string; items: [Tab, string, string][] }[] = [
+  { group: "Console", items: [["overview", "Overview", "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"]] },
+  { group: "Resources", items: [
+    ["market", "Machines", "M4 7h16v10H4zM4 11h16M8 15h3"],
+    ["leases", "Leases", "M12 21a9 9 0 100-18 9 9 0 000 18M12 7v5.2l3.4 2"],
+  ] },
+  { group: "Operations", items: [["provide", "Provide", "M12 3v11M7.5 9.5l4.5 4.5 4.5-4.5M4 20h16"]] },
+];
 
 export default function App() {
   const wallet = useWallet();
   const fmt = useMemo(() => makeFormat("USD", 2), []);
-  const [tab, setTab] = useState<Tab>("market");
+  const [tab, setTab] = useState<Tab>("overview");
   const [data, setData] = useState<{ deployed: boolean; listings: Listing[]; leases: Lease[]; usdg: number } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
+  const [menu, setMenu] = useState(false);
+  const [at, setAt] = useState<number>(0);
 
   const load = useCallback(async (addr: string) => {
     try {
       const r = await fetch(`/api/market${addr ? `?address=${addr}` : ""}`);
-      setData(await r.json());
+      setData(await r.json()); setAt(Date.now());
     } catch { /* keep the last good read */ }
   }, []);
   useEffect(() => { void load(wallet.address ?? ""); }, [wallet.address, load]);
-  // leases meter per second, so the numbers have to move on their own
   useEffect(() => {
     const t = setInterval(() => void load(wallet.address ?? ""), 10_000);
     return () => clearInterval(t);
   }, [wallet.address, load]);
+  useEffect(() => {
+    if (!menu) return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setMenu(false); };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [menu]);
 
   const done = (text: string) => { setMsg({ ok: true, text }); void load(wallet.address ?? ""); };
   const fail = (e: unknown) => {
@@ -45,45 +65,69 @@ export default function App() {
   const leases = data?.leases ?? [];
   const open = leases.filter((l) => !l.closedAt);
   const common = { fmt, busy, setBusy, send, done, fail, wallet, usdg: data?.usdg ?? 0 };
+  const go = (t: Tab) => { setTab(t); setMsg(null); setPicked(null); setMenu(false); };
+  const title = tab === "overview" ? "Overview" : tab === "market" ? (picked !== null ? "Machine" : "Machines") : tab === "leases" ? "Leases" : "Provide";
 
   return (
-    <div>
-      <nav className="nav">
-        <a className="brand mini" href="/"><Mark /><span>Rentnode</span></a>
-        <div className="nav-links tabs">
-            {(["market", "leases", "provide"] as Tab[]).map((t) => (
-              <button key={t} className={tab === t ? "on" : ""} onClick={() => { setTab(t); setMsg(null); setPicked(null); }}>
-                {t === "market" ? "Market" : t === "leases" ? `Leases${open.length ? ` (${open.length})` : ""}` : "Provide"}
-              </button>
-            ))}
+    <div className="dash">
+      {/* ---- rail ---- */}
+      <aside className={`rail${menu ? " open" : ""}`}>
+        <a className="rail-brand" href="/"><Mark /><span><b>Rentnode</b><small>Compute console</small></span></a>
+        <div className="rail-search"><span>SEARCH</span><kbd>⌘K</kbd></div>
+        <a className="btn sm mint rail-cta" href="#" onClick={(e) => { e.preventDefault(); go("provide"); }}>ADD A MACHINE</a>
+        <nav className="rail-nav">
+          {NAV.map((g) => (
+            <div key={g.group}>
+              <div className="rail-group">{g.group}</div>
+              {g.items.map(([t, label, d]) => (
+                <button key={t} className={tab === t ? "on" : ""} onClick={() => go(t)}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square"><path d={d} /></svg>
+                  {label}
+                  {t === "leases" && open.length > 0 && <em>{open.length}</em>}
+                </button>
+              ))}
+            </div>
+          ))}
+        </nav>
+        <div className="rail-foot">
+          <div className="rail-group">Contract</div>
+          <a className="mono" href={`https://robinhoodchain.blockscout.com/address/${MARKET}`} target="_blank" rel="noreferrer">{MARKET ? short(MARKET) : "not deployed"} ↗</a>
+          <a href="/docs" style={{ marginTop: 8 }}>Docs</a>
         </div>
-        <span style={{ marginLeft: 18 }}>
+      </aside>
+      {menu && <button className="rail-veil" onClick={() => setMenu(false)} aria-label="Close menu" />}
+
+      {/* ---- main ---- */}
+      <div className="dash-main">
+        <header className="topbar">
+          <button className="topbar-burger" onClick={() => setMenu(true)} aria-label="Open menu"><i /><i /><i /></button>
+          <div className="crumbs"><span>CONSOLE</span><i>›</i><span>RH:4663</span><i>›</i><b>{title.toUpperCase()}</b></div>
+          <span className="sp" />
+          <span className="topbar-env"><i /> PRODUCTION</span>
+          <span className="topbar-env dim">{at ? `updated ${Math.max(0, Math.round((Date.now() - at) / 1000))}s ago` : "reading…"}</span>
           {wallet.address
             ? <button className="btn sm" onClick={() => wallet.disconnect()}>{short(wallet.address)}</button>
             : wallet.unavailable
               ? <a className="btn sm" href="https://metamask.io/download/" target="_blank" rel="noreferrer">Get a wallet</a>
               : <button className="btn sm primary" onClick={() => void wallet.connect()} disabled={wallet.busy}>{wallet.busy ? "…" : "Connect"}</button>}
-        </span>
-      </nav>
+        </header>
 
-      <main className="wrap" style={{ paddingTop: 34, paddingBottom: 90 }}>
-        {msg && <div className={`msg ${msg.ok ? "ok" : "err"}`}>{msg.text}</div>}
-        {wallet.error && <div className="msg err">{wallet.error}</div>}
-        {wallet.address && !wallet.chainOk && (
-          <div className="msg err">Your wallet is on another network. Switch it to RH Chain to sign anything here.</div>
-        )}
-        {data && !data.deployed && (
-          <div className="msg err">The marketplace contract isn&apos;t deployed yet — the shelf fills the moment it is.</div>
-        )}
+        <main className="dash-body">
+          {msg && <div className={`msg ${msg.ok ? "ok" : "err"}`}>{msg.text}</div>}
+          {wallet.error && <div className="msg err">{wallet.error}</div>}
+          {wallet.address && !wallet.chainOk && <div className="msg err">Your wallet is on another network. Switch it to RH Chain to sign anything here.</div>}
+          {data && !data.deployed && <div className="msg err">The marketplace contract isn&apos;t deployed yet — the shelf fills the moment it is.</div>}
 
-        {tab === "market" && (
-          picked !== null && listings[picked]
-            ? <Detail l={listings[picked]} back={() => setPicked(null)} {...common} />
-            : <Market listings={listings} pick={setPicked} fmt={fmt} />
-        )}
-        {tab === "leases" && <Leases leases={leases} {...common} />}
-        {tab === "provide" && <Provide listings={listings} {...common} />}
-      </main>
+          {tab === "overview" && <Overview listings={listings} leases={leases} usdg={data?.usdg ?? 0} fmt={fmt} go={go} pick={(i) => { setTab("market"); setPicked(i); }} wallet={wallet} />}
+          {tab === "market" && (
+            picked !== null && listings[picked]
+              ? <Detail l={listings[picked]} back={() => setPicked(null)} {...common} />
+              : <Market listings={listings} pick={setPicked} fmt={fmt} />
+          )}
+          {tab === "leases" && <Leases leases={leases} {...common} />}
+          {tab === "provide" && <Provide listings={listings} {...common} />}
+        </main>
+      </div>
     </div>
   );
 }
@@ -95,7 +139,125 @@ type Common = {
   wallet: ReturnType<typeof useWallet>; usdg: number;
 };
 
+/** The KPI strip: six tiles, every one a count or a sum off the contract. */
+function Kpis({ cells }: { cells: [string, string, string, string?][] }) {
+  return (
+    <div className="kpis">
+      {cells.map(([k, v, sub, tone]) => (
+        <div className={`kpi${tone ? ` ${tone}` : ""}`} key={k}>
+          <span><i />{k}</span>
+          <b>{v}</b>
+          <small>{sub}</small>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------- overview
+
+function Overview({ listings, leases, usdg, fmt, go, pick, wallet }: {
+  listings: Listing[]; leases: Lease[]; usdg: number; fmt: (n: number) => string;
+  go: (t: Tab) => void; pick: (i: number) => void; wallet: ReturnType<typeof useWallet>;
+}) {
+  const open = listings.filter((l) => l.open);
+  const live = leases.filter((l) => !l.closedAt);
+  const held = live.reduce((s, l) => s + l.refundable, 0);
+  const spent = leases.reduce((s, l) => s + l.earned, 0);
+  const byKind = KINDS.map((k, i) => [k, listings.filter((l) => l.kind === i && l.open).length] as const);
+
+  return (
+    <>
+      <div className="dash-head">
+        <div>
+          <h1 className="display sm"><Typed text="Infrastructure overview" /></h1>
+          <p className="k" style={{ marginTop: 6 }}>{open.length} machines on the shelf · {live.length} leases running · read off the contract every 10s</p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn sm" onClick={() => go("market")}>Browse machines</button>
+          <button className="btn sm mint" onClick={() => go("provide")}>+ New listing</button>
+        </div>
+      </div>
+
+      <Kpis cells={[
+        ["Machines listed", String(open.length), `${listings.length - open.length} closed`],
+        ["Kinds available", String(byKind.filter(([, n]) => n > 0).length), "of 4 categories"],
+        ["Your leases", String(live.length), `${leases.length - live.length} closed`, live.length ? "ok" : undefined],
+        ["Escrow held", fmt(held), "refundable now", held > 0 ? "warn" : undefined],
+        ["Spent to date", fmt(spent), "to providers"],
+        ["Wallet", fmt(usdg), wallet.address ? short(wallet.address) : "not connected"],
+      ]} />
+
+      <div className="ov-grid">
+        <div className="card">
+          <div className="card-head"><span className="k">Shelf health · {listings.length} listings</span><span className="k live">live</span></div>
+          <div className="card-pad" style={{ gap: 14 }}>
+            <div className="health">
+              {listings.length === 0
+                ? Array.from({ length: 48 }, (_, i) => <i key={i} className="empty" />)
+                : listings.map((l) => <i key={l.id} className={l.open ? "ok" : "off"} title={l.spec} onClick={() => pick(l.id)} />)}
+            </div>
+            <div className="legend">
+              <span><i className="ok" />Open <b>{open.length}</b></span>
+              <span><i className="off" />Closed <b>{listings.length - open.length}</b></span>
+              <span><i className="empty" />Empty slot</span>
+            </div>
+            <div className="specs" style={{ marginTop: 4 }}>
+              {byKind.map(([k, n]) => <div className="spec" key={k}><span>{k}</span><b>{n} open</b></div>)}
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-head"><span className="k">Activity</span><button className="k linkish" onClick={() => go("leases")}>View all</button></div>
+          <div className="card-pad" style={{ gap: 0 }}>
+            {!wallet.address ? <div className="empty">Connect a wallet to see your activity.</div>
+              : leases.length === 0 ? <div className="empty">No leases yet.</div>
+              : [...leases].reverse().slice(0, 6).map((l) => (
+                <div className="act" key={l.id}>
+                  <span className="act-ic"><Icon kind={l.kind} size={18} still /></span>
+                  <div><b>{l.closedAt ? "Closed" : "Running"} · {l.spec.split("/")[0]?.trim() || KINDS[l.kind]}</b><span>{fmt(l.pricePerHour)}/hr · {l.closedAt ? `paid ${fmt(l.earned)}` : `${humanDuration(l.runway)} left`}</span></div>
+                  <span className={`chip ${l.closedAt ? "off" : "on"}`}>{l.closedAt ? "done" : "live"}</span>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 18 }}>
+        <div className="card-head"><span className="k">Recent machines</span><button className="k linkish" onClick={() => go("market")}>Open the market</button></div>
+        <MachineTable rows={[...listings].reverse().slice(0, 6)} pick={pick} fmt={fmt} compact />
+      </div>
+    </>
+  );
+}
+
 // ------------------------------------------------------------------ market
+
+function MachineTable({ rows, pick, fmt, compact }: { rows: Listing[]; pick: (i: number) => void; fmt: (n: number) => string; compact?: boolean }) {
+  if (rows.length === 0) return <div className="empty">Nothing listed yet. Anyone can add a machine from Provide — no gatekeeper, no deposit.</div>;
+  return (
+    <div className="tbl-wrap flat">
+      <table className="tbl res">
+        <thead><tr><th>Resource</th><th>Type</th><th>Status</th><th>Spec</th>{!compact && <th>Provider</th>}<th className="r">Cost / hr</th><th className="r">Per sec</th><th></th></tr></thead>
+        <tbody>
+          {rows.map((l, i) => (
+            <tr key={l.id} onClick={() => pick(l.id)}>
+              <td className="res-name"><span className="res-ic"><Icon kind={l.kind} size={20} i={i} /></span><div><b>{l.spec.split("/")[0]?.trim() || KINDS[l.kind]}</b><small className="mono">#{l.id}</small></div></td>
+              <td className="mono">{KINDS[l.kind]}</td>
+              <td><span className={`dot ${l.open ? "ok" : "off"}`} />{l.open ? "Available" : "Closed"}</td>
+              <td className="dim">{l.spec}</td>
+              {!compact && <td className="mono dim">{short(l.provider)}</td>}
+              <td className="r mono">{fmt(l.pricePerHour)}</td>
+              <td className="r mono dim">{(l.pricePerHour / 3600).toFixed(6)}</td>
+              <td className="r"><span className="k">OPEN →</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function Market({ listings, pick, fmt }: { listings: Listing[]; pick: (i: number) => void; fmt: (n: number) => string }) {
   const [kind, setKind] = useState(-1);
@@ -111,82 +273,37 @@ function Market({ listings, pick, fmt }: { listings: Listing[]; pick: (i: number
 
   return (
     <>
-      <div className="card mkt-hero">
-        <div style={{ minWidth: 0 }}>
-          <div className="pill"><span>Metered by the second · settlement only</span></div>
-          <h1 className="display" style={{ fontSize: "clamp(28px,3.6vw,40px)", margin: 0 }}><Typed text="Rent the machine," />{" "}<br /><Typed text="not the month" delay={420} cursor /></h1>
+      <div className="dash-head">
+        <div>
+          <h1 className="display sm"><Typed text="Machines" /></h1>
+          <p className="k" style={{ marginTop: 6 }}>{listings.length} resources · filtered to {rows.length}</p>
         </div>
-        <span className="sp" />
-        <Icon kind={0} size={92} i={2} />
       </div>
 
-      <div className="shell">
-        <aside className="filters card">
-          <div className="grp">
-            <span className="k">Search</span>
-            <div className="inp" style={{ marginTop: 9, padding: "9px 13px" }}>
-              <input placeholder="RTX 4090, eu-central…" value={q} onChange={(e) => setQ(e.target.value)} style={{ fontSize: 13.5 }} />
-            </div>
-          </div>
-          <div className="grp">
-            <span className="k">Category</span>
-            <div className="seg col">
-              <button className={kind < 0 ? "on" : ""} onClick={() => setKind(-1)}>All</button>
-              {KINDS.map((k, i) => <button key={k} className={kind === i ? "on" : ""} onClick={() => setKind(i)}>{k}</button>)}
-            </div>
-          </div>
-          <div className="grp">
-            <span className="k">Sort by</span>
-            <div className="seg col">
-              {([["new", "Newest"], ["cheap", "Cheapest"], ["dear", "Priciest"]] as const).map(([v, l]) => (
-                <button key={v} className={sort === v ? "on" : ""} onClick={() => setSort(v)}>{l}</button>
-              ))}
-            </div>
-          </div>
-          <div className="grp">
-            <label className="switch">
-              <input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} />
-              <i />Available only
-            </label>
-          </div>
-        </aside>
+      <Kpis cells={[
+        ["On the shelf", String(listings.filter((l) => l.open).length), "available now"],
+        ["GPU", String(listings.filter((l) => l.kind === 0 && l.open).length), "listed"],
+        ["CPU", String(listings.filter((l) => l.kind === 1 && l.open).length), "listed"],
+        ["Storage", String(listings.filter((l) => l.kind === 2 && l.open).length), "listed"],
+        ["Database", String(listings.filter((l) => l.kind === 3 && l.open).length), "listed"],
+        ["Cheapest", listings.length ? fmt(Math.min(...listings.filter((l) => l.open).map((l) => l.pricePerHour))) : "—", "USDG / hr"],
+      ]} />
 
-        <section>
-          <div className="count">Showing {rows.length} of {listings.length} machines</div>
-          {rows.length === 0 ? (
-            <div className="card">
-              <div className="card-head"><span className="k">Empty shelf</span><span className="k">0 machines</span></div>
-              <div className="card-pad" style={{ gap: 18, padding: "34px 28px" }}>
-                <p className="kicker" style={{ margin: 0, fontSize: 16, maxWidth: "46ch" }}>
-                  Nothing is listed yet. Anyone can put a machine here — there is no gatekeeper,
-                  no deposit and no approval queue.
-                </p>
-                <div className="specs" style={{ maxWidth: 520 }}>
-                  <div className="spec"><span>To list</span><b>One transaction of gas</b></div>
-                  <div className="spec"><span>You are paid</span><b>Per second, while it runs</b></div>
-                  <div className="spec"><span>Withdraw</span><b>Any time, without ending the lease</b></div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid">
-              {rows.map((l) => (
-                <button className="tile" key={l.id} onClick={() => pick(l.id)}>
-                  <span className={`chip ${l.open ? "on" : "off"} hot`}>{l.open ? KINDS[l.kind] : "Closed"}</span>
-                  <span className="tile-art k"><Icon kind={l.kind} i={l.id} /></span>
-                  <h4>{l.spec.split("/")[0]?.trim() || KINDS[l.kind]}</h4>
-                  <p className="sub">{l.spec}</p>
-                  <div className="tile-foot">
-                    <span className="price">{fmt(l.pricePerHour)}<i> /hr</i></span>
-                    <span className="sp" />
-                    <span className="k" aria-hidden>OPEN →</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
+      <div className="filters-row">
+        <div className="inp" style={{ padding: "8px 12px", flex: 1, minWidth: 200 }}><input placeholder="Filter by name, spec, region…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
+        <div className="seg" style={{ flex: "none" }}>
+          <button className={kind < 0 ? "on" : ""} onClick={() => setKind(-1)}>All</button>
+          {KINDS.map((k, i) => <button key={k} className={kind === i ? "on" : ""} onClick={() => setKind(i)}>{k}</button>)}
+        </div>
+        <div className="seg" style={{ flex: "none" }}>
+          {([["new", "Newest"], ["cheap", "Cheapest"], ["dear", "Priciest"]] as const).map(([v, l]) => (
+            <button key={v} className={sort === v ? "on" : ""} onClick={() => setSort(v)}>{l}</button>
+          ))}
+        </div>
+        <label className="switch"><input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} /><i />Available only</label>
       </div>
+
+      <div className="card"><MachineTable rows={rows} pick={pick} fmt={fmt} /></div>
     </>
   );
 }

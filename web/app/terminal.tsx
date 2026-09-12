@@ -38,29 +38,31 @@ function useTicker(ms: number): number {
   return n;
 }
 
+/* One tick counter drives everything; the transcript, the meter and the die
+   are all pure functions of it, so nothing can fall out of step. A cycle is
+   the typing phase followed by one full lease, then it starts over. */
+const TYPE_TICKS = BOOT.length * 2;
+const LEASE_TICKS = Math.ceil(FUNDED / RATE / SPEED);
+const CYCLE = TYPE_TICKS + LEASE_TICKS;
+
 export function HeroTerminal() {
-  const [lines, setLines] = useState(0);
-  const [secs, setSecs] = useState(0);
+  const [n, setN] = useState(0);
   const [cells, setCells] = useState<number[]>(() => Array(128).fill(0));
   const still = useRef(false);
 
   useEffect(() => {
     still.current = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    if (still.current) { setLines(BOOT.length); setSecs(4200); return; }
-
-    let n = 0;
+    if (still.current) { setN(TYPE_TICKS + 90); return; }
     const id = setInterval(() => {
-      n++;
-      // the command types itself out first, then the meter takes over
-      if (n <= BOOT.length * 2) { setLines(Math.ceil(n / 2)); return; }
-      setSecs((s) => (s + SPEED >= FUNDED / RATE ? 0 : s + SPEED));
+      setN((v) => v + 1);
       setCells((c) => c.map((v) => (Math.random() < 0.14 ? (v ? 0 : 1) : v)));
     }, TICK);
     return () => clearInterval(id);
   }, []);
 
-  // reset the transcript whenever the meter wraps, so the loop reads as a new lease
-  useEffect(() => { if (secs === 0 && !still.current) setLines(0); }, [secs]);
+  const k = n % CYCLE;
+  const lines = Math.min(BOOT.length, Math.ceil(k / 2));
+  const secs = k > TYPE_TICKS ? (k - TYPE_TICKS) * SPEED : 0;
 
   const spent = Math.min(FUNDED, secs * RATE);
   const left = Math.max(0, FUNDED - spent);
