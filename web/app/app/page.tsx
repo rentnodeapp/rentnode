@@ -8,6 +8,7 @@ import { MARKET, USDG, USDG_DECIMALS, KINDS, marketAbi, erc20ApproveAbi, humanDu
 import type { Listing, Lease } from "../api/market/route.ts";
 import { Icon, Mark, Arrow } from "../icons.tsx";
 import { Typed } from "../type.tsx";
+import { SITE_URL, DOCS_URL } from "../../src/site.ts";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 type Tab = "overview" | "market" | "leases" | "provide";
@@ -72,7 +73,7 @@ export default function App() {
     <div className="dash">
       {/* ---- rail ---- */}
       <aside className={`rail${menu ? " open" : ""}`}>
-        <a className="rail-brand" href="/"><Mark /><span><b>Rentnode</b><small>Compute console</small></span></a>
+        <a className="rail-brand" href={SITE_URL}><Mark /><span><b>Rentnode</b><small>Compute console</small></span></a>
         <div className="rail-search"><span>SEARCH</span><kbd>⌘K</kbd></div>
         <a className="btn sm mint rail-cta" href="#" onClick={(e) => { e.preventDefault(); go("provide"); }}>ADD A MACHINE</a>
         <nav className="rail-nav">
@@ -92,7 +93,7 @@ export default function App() {
         <div className="rail-foot">
           <div className="rail-group">Contract</div>
           <a className="mono" href={`https://robinhoodchain.blockscout.com/address/${MARKET}`} target="_blank" rel="noreferrer">{MARKET ? short(MARKET) : "not deployed"} ↗</a>
-          <a href="/docs" style={{ marginTop: 8 }}>Docs</a>
+          <a href={DOCS_URL} style={{ marginTop: 8 }}>Docs</a>
         </div>
       </aside>
       {menu && <button className="rail-veil" onClick={() => setMenu(false)} aria-label="Close menu" />}

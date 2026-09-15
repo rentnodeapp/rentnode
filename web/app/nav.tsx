@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Mark } from "./icons.tsx";
+import { APP_URL, SITE_URL } from "../src/site.ts";
 
 const LINKS: [string, string][] = [
   ["#how", "How"],
@@ -28,13 +29,13 @@ export function SiteNav() {
   return (
     <>
       <nav className="nav">
-        <a className="brand" href="/"><Mark /><span>Rentnode</span></a>
+        <a className="brand" href={SITE_URL}><Mark /><span>Rentnode</span></a>
 
         <div className="nav-links">
           {LINKS.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
         </div>
 
-        <a className="btn sm primary nav-cta" href="/app">Open the market</a>
+        <a className="btn sm primary nav-cta" href={APP_URL}>Open the market</a>
 
         <button
           className={`burger${open ? " open" : ""}`}
@@ -55,7 +56,7 @@ export function SiteNav() {
                 <span>{label}</span><span className="k">→</span>
               </a>
             ))}
-            <a className="btn primary wide" href="/app" onClick={() => setOpen(false)}>Open the market</a>
+            <a className="btn primary wide" href={APP_URL} onClick={() => setOpen(false)}>Open the market</a>
           </div>
         </>
       )}

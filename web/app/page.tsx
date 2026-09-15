@@ -3,6 +3,7 @@ import { Hero } from "./hero.tsx";
 import { Typed } from "./type.tsx";
 import { HeroTerminal, SupplyPanel, SettlementPanel } from "./terminal.tsx";
 import { LiveShelf } from "./shelf.tsx";
+import { APP_URL } from "../src/site.ts";
 
 /* The RH-4 page shape - numbered sections, stat strips, spec rows, dark
    instrument panels, an opcode-style table, a deployment table, a roadmap -
@@ -317,7 +318,7 @@ export default function Landing() {
             ))}
           </div>
           <div style={{ marginTop: 36, display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <a className="btn primary" href="/app">Open the market →</a>
+            <a className="btn primary" href={APP_URL}>Open the market →</a>
             <a className="btn" href={EXPLORER} target="_blank" rel="noreferrer">Contract on Blockscout ↗</a>
           </div>
         </div>

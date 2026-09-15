@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import "./hero.css";
+import { APP_URL, DOCS_URL, SITE_URL } from "../src/site.ts";
 
 /* The full-viewport video hero. Three behaviours, each owned by one effect:
    the entrance sequence (runs once, then detaches every rule it used), the
    burger menu, and the two-video cross-fade that hides the loop seam. The
    background is the stage and is never animated; only the foreground moves. */
 
-const LINKS: [string, string][] = [["#how", "How"], ["#shelf", "Shelf"], ["#supply", "Supply"], ["#functions", "Spec"], ["/docs", "Docs"]];
+const LINKS: [string, string][] = [["#how", "How"], ["#shelf", "Shelf"], ["#supply", "Supply"], ["#functions", "Spec"], [DOCS_URL, "Docs"]];
 
 const Arw = () => (
   <svg className="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true">
@@ -101,13 +102,13 @@ export function Hero() {
 
       <header className="hx-nav">
         {/* eslint-disable-next-line @next/next/no-img-element -- static 256px mark */}
-        <a className="hx-logo" href="/"><img src="/logo.png" alt="" width={24} height={24} />Rentnode</a>
+        <a className="hx-logo" href={SITE_URL}><img src="/logo.png" alt="" width={24} height={24} />Rentnode</a>
         <nav className="hx-links" aria-label="Primary">
           {LINKS.map(([h, l]) => <a key={h} href={h}>{l}</a>)}
         </nav>
         <div className="hx-actions">
-          <a className="hx-btn hx-login" href="/app">Console</a>
-          <a className="hx-btn hx-start" href="/app">Open the market<Arw /></a>
+          <a className="hx-btn hx-login" href={APP_URL}>Console</a>
+          <a className="hx-btn hx-start" href={APP_URL}>Open the market<Arw /></a>
         </div>
         <button ref={burger} className="hx-burger" id="burger" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="menu" onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}><span /></button>
       </header>
@@ -115,8 +116,8 @@ export function Hero() {
       <nav ref={menu} className={`hx-menu${open ? " open" : ""}`} id="menu" aria-label="Mobile" onClick={(e) => { if ((e.target as HTMLElement).closest("a")) setOpen(false); }}>
         {LINKS.map(([h, l]) => <a key={h} href={h}>{l}</a>)}
         <div className="divider" />
-        <a href="/app">Console</a>
-        <a className="m-start" href="/app">Open the market<Arw /></a>
+        <a href={APP_URL}>Console</a>
+        <a className="m-start" href={APP_URL}>Open the market<Arw /></a>
       </nav>
 
       <div className="hx-inner">
@@ -127,7 +128,7 @@ export function Hero() {
           it stops being worth it — every unspent cent comes straight back.
         </p>
         <div className="hx-ctas">
-          <a className="hx-btn hx-lg hx-primary" href="/app">Open the market<Arw /></a>
+          <a className="hx-btn hx-lg hx-primary" href={APP_URL}>Open the market<Arw /></a>
           <a className="hx-btn hx-lg hx-ghost" href="#functions">Read the spec<Arw /></a>
         </div>
       </div>

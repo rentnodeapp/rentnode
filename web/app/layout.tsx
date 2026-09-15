@@ -18,6 +18,7 @@ const DESCRIPTION =
   "List a GPU, CPU, disk or database and get paid per second. Renters escrow USDG and can stop any time - every unspent cent comes back. Settled on RH Chain.";
 
 export const metadata: Metadata = {
+  metadataBase: process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL) : undefined,
   title: TITLE,
   description: DESCRIPTION,
   applicationName: "Rentnode",
