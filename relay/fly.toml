@@ -1,0 +1,24 @@
+# fly launch --no-deploy ; fly volumes create relay_data --size 1 ; fly secrets set VAST_API_KEY=... RELAY_PRIVATE_KEY=... PUBLIC_URL=https://<app>.fly.dev ; fly deploy
+app = "rentnode-relay"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8787"
+  DATA_DIR = "/app/data"
+  RPC_URL = "https://robinhood-rpc.publicnode.com"
+  MARGIN = "0.15"
+  SYNC_MIN = "60"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+[mounts]
+  source = "relay_data"
+  destination = "/app/data"

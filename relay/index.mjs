@@ -114,7 +114,8 @@ async function sync() {
     if (id !== undefined && mine.has(id)) {
       const cur = await read("listingAt", [BigInt(id)]);
       const open = !!offer;
-      if (cur.pricePerHour !== price || cur.open !== open) {
+      // endpoint is compared too, so moving the relay to a new host relists
+      if (cur.pricePerHour !== price || cur.open !== open || cur.endpoint !== endpoint) {
         await write("updateListing", [BigInt(id), open ? price : cur.pricePerHour, endpoint, open]);
         console.log(`[sync] ${c.key} #${id} -> ${open ? formatUnits(price, 6) + " USDG/hr" : "closed (no supply)"}`);
       }
