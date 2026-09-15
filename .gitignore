@@ -9,3 +9,5 @@ relay/.env
 relay/data/
 relay/*.log
 relay/*.err
+web/dev.log
+web/dev.err
