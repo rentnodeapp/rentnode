@@ -588,3 +588,34 @@ em { font-style: italic; }
 .access-out details { margin-top: 6px; }
 .access-out summary { cursor: pointer; list-style: none; }
 .access-out .code { font-size: 10.5px; margin-top: 8px; padding: 12px; background: var(--panel); border: var(--hair); border-radius: 12px; }
+
+/* machine cards on the shelf */
+.mgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1240px) { .mgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .mgrid { grid-template-columns: 1fr; } }
+.mcard {
+  position: relative; display: flex; flex-direction: column; gap: 12px; text-align: left; width: 100%;
+  padding: 18px 18px 16px; border: var(--rule); border-radius: var(--r); background: var(--glass); color: var(--ink);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); overflow: hidden; cursor: pointer;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+.mcard::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(70% 45% at 50% 0%, rgba(201,242,122,.14), transparent 70%); opacity: .7; transition: opacity .22s ease; }
+.mcard:hover { transform: translateY(-3px); border-color: rgba(201,242,122,.38); background: rgba(3,20,10,.9); box-shadow: 0 18px 40px -20px rgba(201,242,122,.35); }
+.mcard:hover::before { opacity: 1; }
+.mcard.closed { opacity: .55; }
+.mcard-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mcard-kind { font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); }
+.mcard-status { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(201,242,122,.18); background: rgba(201,242,122,.06); color: var(--mint); }
+.mcard-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 8px var(--mint); }
+.mcard-status.off { color: var(--dim); border-color: rgba(201,242,122,.1); background: transparent; }
+.mcard-status.off i { background: var(--dim); box-shadow: none; }
+.mcard-art { display: grid; place-items: center; height: 116px; border-radius: 16px; border: 1px solid rgba(201,242,122,.12); background: radial-gradient(60% 70% at 50% 60%, rgba(201,242,122,.16), rgba(3,20,10,.2) 75%); color: var(--mint); }
+.mcard-art .ani { transition: transform .3s cubic-bezier(.22,1,.36,1); }
+.mcard:hover .mcard-art .ani { transform: scale(1.08) rotate(-3deg); }
+.mcard h4 { margin: 2px 0 0; font-family: var(--display); font-size: 22px; font-weight: 500; letter-spacing: -.02em; }
+.mcard-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 22px; }
+.mcard-chips span { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(201,242,122,.16); color: var(--ink-2); }
+.mcard-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; padding-top: 14px; border-top: var(--hair); }
+.mcard-price b { display: block; font-family: var(--mono); font-size: 24px; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; background: var(--lime-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mcard-price span { display: block; margin-top: 2px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; color: var(--dim); }
+.mcard-prov { font-size: 10px; color: var(--dim); letter-spacing: .06em; }

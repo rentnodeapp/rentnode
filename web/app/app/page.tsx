@@ -259,6 +259,36 @@ function MachineTable({ rows, pick, fmt, compact }: { rows: Listing[]; pick: (i:
   );
 }
 
+/* The shelf as cards: art, name, the spec split into chips, and one price
+   that reads before anything else. */
+function MachineCards({ rows, pick, fmt }: { rows: Listing[]; pick: (i: number) => void; fmt: (n: number) => string }) {
+  if (rows.length === 0) return <div className="card"><div className="empty">Nothing listed yet. Anyone can add a machine from Provide — no gatekeeper, no deposit.</div></div>;
+  return (
+    <div className="mgrid">
+      {rows.map((l, i) => {
+        const parts = l.spec.split("/").map((s) => s.trim()).filter(Boolean);
+        const name = parts[0] || KINDS[l.kind];
+        return (
+          <button key={l.id} className={`mcard${l.open ? "" : " closed"}`} onClick={() => pick(l.id)}>
+            <div className="mcard-top">
+              <span className="mcard-kind">{KINDS[l.kind]} · #{l.id}</span>
+              <span className={`mcard-status ${l.open ? "ok" : "off"}`}><i />{l.open ? "Available" : "Closed"}</span>
+            </div>
+            <div className="mcard-art"><Icon kind={l.kind} size={64} i={i} /></div>
+            <h4>{name}</h4>
+            <div className="mcard-chips">{parts.slice(1).map((p) => <span key={p}>{p}</span>)}</div>
+            <div className="mcard-foot">
+              <div className="mcard-price"><b>{fmt(l.pricePerHour)}</b><span>USDG / hr · {(l.pricePerHour / 3600).toFixed(6)} per sec</span></div>
+              <span className="btn primary sm">Rent →</span>
+            </div>
+            <span className="mcard-prov mono">{short(l.provider)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function Market({ listings, pick, fmt }: { listings: Listing[]; pick: (i: number) => void; fmt: (n: number) => string }) {
   const [kind, setKind] = useState(-1);
   const [openOnly, setOpenOnly] = useState(true);
@@ -303,7 +333,7 @@ function Market({ listings, pick, fmt }: { listings: Listing[]; pick: (i: number
         <label className="switch"><input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} /><i />Available only</label>
       </div>
 
-      <div className="card"><MachineTable rows={rows} pick={pick} fmt={fmt} /></div>
+      <MachineCards rows={rows} pick={pick} fmt={fmt} />
     </>
   );
 }
