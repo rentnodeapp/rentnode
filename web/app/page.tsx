@@ -1,5 +1,5 @@
 import { Mark } from "./icons.tsx";
-import { SiteNav } from "./nav.tsx";
+import { Hero } from "./hero.tsx";
 import { Typed } from "./type.tsx";
 import { HeroTerminal, SupplyPanel, SettlementPanel } from "./terminal.tsx";
 import { LiveShelf } from "./shelf.tsx";
@@ -68,32 +68,26 @@ const ROAD: [string, string, string[]][] = [
 export default function Landing() {
   return (
     <div>
-      <SiteNav />
+      <Hero />
 
-      {/* ---- hero ---- */}
-      <header style={{ borderBottom: "var(--rule)" }}>
-        <div className="wrap" style={{ padding: "clamp(36px,5vw,72px) var(--gutter) clamp(40px,6vw,80px)" }}>
+      {/* ---- the meter, and the figures the hero used to carry ---- */}
+      <section className="sec" id="meter">
+        <div className="wrap">
           <div className="g2 hero">
             <div>
               <div className="pill"><span>LIVE · CHAIN 4663 · SETTLEMENT ONLY</span><span className="mono" style={{ fontSize: 10.5 }}>{MARKET.slice(0, 6)}…{MARKET.slice(-4)}</span></div>
-              <h1 className="display lg"><Typed text="Rent the machine," /> <br /><Typed text="pay by the " delay={430} /><em><Typed text="second." delay={720} cursor /></em></h1>
+              <h2 className="display"><Typed text="The meter, running." /></h2><i className="wipe" />
               <p className="kicker">
-                GPUs, CPUs, disks and databases from whoever has them spare. Escrow USDG, and
-                the money moves to the provider one second at a time. Stop whenever it stops
-                being worth it — the rest comes straight back.
+                A lease in front of you: the command types itself out, then elapsed, spent,
+                refundable and runway tick over per second against a consumption bar. The
+                arithmetic is the contract&apos;s - same rate, same accrual, same runway.
               </p>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <a className="btn primary" href="/app">Open the market →</a>
-                <a className="btn" href="#functions">Read the datasheet</a>
-              </div>
             </div>
             <HeroTerminal />
           </div>
+          <div className="stats" style={{ marginTop: 40 }}>{STATS.map(([v, l]) => <div key={l}><b>{v}</b><span>{l}</span></div>)}</div>
         </div>
-        <div className="wrap" style={{ paddingBottom: 0 }}>
-          <div className="stats">{STATS.map(([v, l]) => <div key={l}><b>{v}</b><span>{l}</span></div>)}</div>
-        </div>
-      </header>
+      </section>
 
       {/* ---- §01 mechanism ---- */}
       <section className="sec" id="how">

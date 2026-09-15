@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader, JetBrains_Mono } from "next/font/google";
+import { Newsreader, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+
+/* The hero is authored in Plus Jakarta Sans; display: block so its entrance
+   never plays against invisible text. */
+const pjs = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600", "800"], variable: "--font-pjs", display: "block" });
 import { Providers } from "./providers.tsx";
 import "./globals.css";
 
@@ -25,7 +29,7 @@ export const viewport: Viewport = { themeColor: "#efeee6", width: "device-width"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${mono.variable}`}>
+    <html lang="en" className={`${display.variable} ${mono.variable} ${pjs.variable}`}>
       <body>
         <Providers>{children}</Providers>
       </body>
