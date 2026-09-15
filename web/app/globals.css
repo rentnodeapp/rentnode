@@ -619,3 +619,5 @@ em { font-style: italic; }
 .mcard-price b { display: block; font-family: var(--mono); font-size: 24px; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; background: var(--lime-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .mcard-price span { display: block; margin-top: 2px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; color: var(--dim); }
 .mcard-prov { font-size: 10px; color: var(--dim); letter-spacing: .06em; }
+
+.foot-links { display: flex; gap: 18px; } .foot-links a { color: var(--ink-2); transition: color .14s; } .foot-links a:hover { color: var(--mint); }

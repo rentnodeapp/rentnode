@@ -6,7 +6,7 @@
 // contract or the relay, not copy.
 
 import { useEffect, useState } from "react";
-import { APP_URL, SITE_URL } from "../../src/site.ts";
+import { APP_URL, SITE_URL, GITHUB_URL } from "../../src/site.ts";
 import "./docs.css";
 
 const MARKET = "0xd172e6Aa54e2D04F4168a339B63F284c99162D9d";
@@ -246,6 +246,7 @@ export default function Docs() {
         <span style={{ flex: 1 }} />
         <a href={SITE_URL} className="dn-link">Home</a>
         <a href={`${EXPLORER}/${MARKET}?tab=contract`} className="dn-link" target="_blank" rel="noreferrer">Contract</a>
+        <a href={GITHUB_URL} className="dn-link" target="_blank" rel="noreferrer">GitHub</a>
         <a href={APP_URL} className="dn-cta">Open the market ↗</a>
         <button className={`docs-burger${menu ? " open" : ""}`} onClick={() => setMenu((v) => !v)} aria-label={menu ? "Close contents" : "Open contents"} aria-expanded={menu}>
           <i /><i /><i />
@@ -260,6 +261,7 @@ export default function Docs() {
             <div className="docs-drawer-foot">
               <a href={SITE_URL} onClick={() => setMenu(false)}>Home</a>
               <a href={`${EXPLORER}/${MARKET}`} target="_blank" rel="noreferrer">Contract</a>
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
               <a href={APP_URL}>Console</a>
             </div>
           </div>
@@ -595,6 +597,7 @@ export default function Docs() {
         <span style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <a href={SITE_URL}>Home</a>
           <a href={`${EXPLORER}/${MARKET}`} target="_blank" rel="noreferrer">Contract</a>
+          <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
           <a href={APP_URL} className="dn-cta">Open the market ↗</a>
         </span>
       </footer>

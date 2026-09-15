@@ -3,7 +3,7 @@ import { Hero } from "./hero.tsx";
 import { Typed } from "./type.tsx";
 import { HeroTerminal, SupplyPanel, SettlementPanel } from "./terminal.tsx";
 import { LiveShelf } from "./shelf.tsx";
-import { APP_URL } from "../src/site.ts";
+import { APP_URL, DOCS_URL, GITHUB_URL } from "../src/site.ts";
 
 /* The RH-4 page shape - numbered sections, stat strips, spec rows, dark
    instrument panels, an opcode-style table, a deployment table, a roadmap -
@@ -328,6 +328,11 @@ export default function Landing() {
         <div className="wrap foot-in">
           <span className="brand"><Mark />Rentnode</span>
           <span className="sp" />
+          <span className="foot-links">
+            <a href={DOCS_URL}>Docs</a>
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
+            <a href={EXPLORER} target="_blank" rel="noreferrer">Contract</a>
+          </span>
           <span>Non-custodial · no owner · no fee · no pause switch</span>
         </div>
       </footer>
