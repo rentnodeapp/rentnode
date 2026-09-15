@@ -209,12 +209,12 @@ em { font-style: italic; }
 .seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 1px; background: rgba(201,242,122,.1); border: var(--rule); border-radius: 999px; overflow: hidden; }
 .seg.col { grid-template-columns: 1fr; }
 .seg button {
-  border: 0; background: var(--paper);
+  border: 0; background: var(--paper); color: var(--ink-2);
   font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
   padding: 11px 8px; transition: background .14s, color .14s;
 }
 
-.seg button:hover { background: var(--paper-2); }
+.seg button:hover { background: var(--paper-2); color: var(--mint); }
 .seg.col button { text-align: left; padding-left: 14px; }
 .seg button.on { background: var(--lime-grad); color: #08210d; }
 
