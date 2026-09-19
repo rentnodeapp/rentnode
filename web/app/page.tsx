@@ -3,7 +3,8 @@ import { Hero } from "./hero.tsx";
 import { Typed } from "./type.tsx";
 import { HeroTerminal, SupplyPanel, SettlementPanel } from "./terminal.tsx";
 import { LiveShelf } from "./shelf.tsx";
-import { APP_URL, DOCS_URL, GITHUB_URL } from "../src/site.ts";
+import { APP_URL, DOCS_URL, GITHUB_URL, TOKEN } from "../src/site.ts";
+import { CopyAddress } from "./copy.tsx";
 
 /* The RH-4 page shape - numbered sections, stat strips, spec rows, dark
    instrument panels, an opcode-style table, a deployment table, a roadmap -
@@ -70,6 +71,20 @@ export default function Landing() {
   return (
     <div>
       <Hero />
+
+      {/* ---- the token, one address, verified here ---- */}
+      <section className="tok" id="token">
+        <div className="wrap tok-in">
+          <div className="tok-l">
+            <span className="tok-badge"><b>RNODE</b>Rentnode · RH Chain 4663</span>
+            <p>Token contract. Verify the address here before you trade it anywhere — this is the only one.</p>
+          </div>
+          <div className="tok-r">
+            <CopyAddress value={TOKEN} />
+            <a className="btn sm" href={`https://robinhoodchain.blockscout.com/token/${TOKEN}`} target="_blank" rel="noreferrer">Blockscout ↗</a>
+          </div>
+        </div>
+      </section>
 
       {/* ---- the meter, and the figures the hero used to carry ---- */}
       <section className="sec" id="meter">

@@ -621,3 +621,17 @@ em { font-style: italic; }
 .mcard-prov { font-size: 10px; color: var(--dim); letter-spacing: .06em; }
 
 .foot-links { display: flex; gap: 18px; } .foot-links a { color: var(--ink-2); transition: color .14s; } .foot-links a:hover { color: var(--mint); }
+
+/* the token strip: one address, in the hero's language */
+.tok { padding: 18px 0; border-bottom: var(--rule); background: linear-gradient(90deg, rgba(201,242,122,.08), transparent 60%); }
+.tok-in { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.tok-l { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; min-width: 0; }
+.tok-l p { margin: 0; font-size: 13px; color: var(--ink-2); max-width: 330px; line-height: 1.45; }
+.tok-badge { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+.tok-badge b { font-family: var(--display); font-size: 13px; font-weight: 700; letter-spacing: -.01em; text-transform: none; padding: 4px 12px; border-radius: 999px; background: var(--lime-grad); color: #08210d; }
+.tok-r { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.tok-ca { display: inline-flex; align-items: center; gap: 0; border: 1px solid rgba(201,242,122,.2); border-radius: 999px; background: var(--glass); overflow: hidden; max-width: 100%; }
+.tok-ca code { font-family: var(--mono); font-size: 12px; letter-spacing: .02em; color: var(--mint); padding: 9px 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tok-ca button { font: inherit; font-family: var(--display); font-size: 12.5px; font-weight: 600; border: 0; border-left: 1px solid rgba(201,242,122,.2); background: rgba(201,242,122,.1); color: var(--ink); padding: 9px 14px; cursor: pointer; transition: background .16s; }
+.tok-ca button:hover { background: rgba(201,242,122,.2); }
+@media (max-width: 760px) { .tok-r { margin-left: 0; width: 100%; } .tok-ca { width: 100%; } .tok-ca code { flex: 1; } }

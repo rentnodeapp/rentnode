@@ -45,6 +45,7 @@ The contract does not run, verify or vouch for any machine. A listing is a claim
 | Name | Address |
 |---|---|
 | ComputeMarket | `0xd172e6Aa54e2D04F4168a339B63F284c99162D9d` |
+| RNODE (token, 18 dec, 1B supply) | `0x954f81c9bdce955619e8533bc5fdd9d0503cf8b4` |
 | USDG | `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168` |
 | Chain | Robinhood Chain, EVM 4663 |
 

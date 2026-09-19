@@ -6,7 +6,7 @@
 // contract or the relay, not copy.
 
 import { useEffect, useState } from "react";
-import { APP_URL, SITE_URL, GITHUB_URL } from "../../src/site.ts";
+import { APP_URL, SITE_URL, GITHUB_URL, TOKEN } from "../../src/site.ts";
 import "./docs.css";
 
 const MARKET = "0xd172e6Aa54e2D04F4168a339B63F284c99162D9d";
@@ -548,6 +548,7 @@ export default function Docs() {
                 <thead><tr><th>Name</th><th>Role</th><th>Address</th></tr></thead>
                 <tbody>
                   <tr><td className="name">ComputeMarket</td><td>Escrow, per-second metering, settlement</td><td><a href={`${EXPLORER}/${MARKET}`} target="_blank" rel="noreferrer"><span className="mono">{MARKET}</span></a></td></tr>
+                  <tr><td className="name">RNODE</td><td>Rentnode token, 18 decimals, 1,000,000,000 supply</td><td><a href={`https://robinhoodchain.blockscout.com/token/${TOKEN}`} target="_blank" rel="noreferrer"><span className="mono">{TOKEN}</span></a></td></tr>
                   <tr><td className="name">USDG</td><td>Quote asset, 6 decimals</td><td><a href={`${EXPLORER}/${USDG}`} target="_blank" rel="noreferrer"><span className="mono">{USDG}</span></a></td></tr>
                   <tr><td className="name">Relay</td><td>Provider key of the Vast.ai relay - no special role</td><td><a href={`${EXPLORER}/${RELAY}`} target="_blank" rel="noreferrer"><span className="mono">{RELAY}</span></a></td></tr>
                 </tbody>
