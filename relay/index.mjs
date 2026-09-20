@@ -41,11 +41,22 @@ if (!VAST_KEY || !RELAY_KEY) { console.error("VAST_API_KEY and RELAY_PRIVATE_KEY
 // The shelf we curate. Each entry is one Vast search; the cheapest verified
 // offer sets the price. Kind matches the contract enum: 0 GPU, 1 CPU.
 const CATALOG = [
+  // consumer
+  { key: "rtx5090", kind: 0, gpu: "RTX 5090", spec: "RTX 5090 / 32GB / via Vast.ai", minVram: 32 },
   { key: "rtx4090", kind: 0, gpu: "RTX 4090", spec: "RTX 4090 / 24GB / via Vast.ai", minVram: 24 },
   { key: "rtx3090", kind: 0, gpu: "RTX 3090", spec: "RTX 3090 / 24GB / via Vast.ai", minVram: 24 },
-  { key: "a100",    kind: 0, gpu: "A100 SXM4", spec: "A100 SXM4 / 80GB / via Vast.ai", minVram: 80 },
+  { key: "rtx3080", kind: 0, gpu: "RTX 3080", spec: "RTX 3080 / 10GB / via Vast.ai", minVram: 10 },
+  { key: "rtx3070", kind: 0, gpu: "RTX 3070", spec: "RTX 3070 / 8GB / via Vast.ai", minVram: 8 },
+  { key: "rtx3060", kind: 0, gpu: "RTX 3060", spec: "RTX 3060 / 12GB / via Vast.ai", minVram: 12 },
+  // workstation
+  { key: "a6000",   kind: 0, gpu: "RTX A6000", spec: "RTX A6000 / 48GB / via Vast.ai", minVram: 48 },
   { key: "l40s",    kind: 0, gpu: "L40S", spec: "L40S / 48GB / via Vast.ai", minVram: 48 },
+  // datacenter
+  { key: "a100",    kind: 0, gpu: "A100 SXM4", spec: "A100 SXM4 / 80GB / via Vast.ai", minVram: 80 },
+  { key: "a100p40", kind: 0, gpu: "A100 PCIE", spec: "A100 PCIE / 40GB / via Vast.ai", minVram: 40 },
+  { key: "v100",    kind: 0, gpu: "Tesla V100", spec: "Tesla V100 / 16GB / via Vast.ai", minVram: 16 },
   { key: "h100",    kind: 0, gpu: "H100 SXM", spec: "H100 SXM / 80GB / via Vast.ai", minVram: 80 },
+  { key: "h100p",   kind: 0, gpu: "H100 PCIE", spec: "H100 PCIE / 80GB / via Vast.ai", minVram: 80 },
 ];
 const IMAGE = "pytorch/pytorch:2.4.0-cuda12.4-cudnn9-runtime";
 
@@ -68,8 +79,9 @@ const abi = [
 ];
 const chain = { id: 4663, name: "RH Chain", nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: { default: { http: [RPC] } } };
 const account = privateKeyToAccount(RELAY_KEY);
-const pub = createPublicClient({ chain, transport: http(RPC) });
-const wal = createWalletClient({ chain, transport: http(RPC), account });
+// public RPCs stall now and then; 30s beats viem's 10s default for writes
+const pub = createPublicClient({ chain, transport: http(RPC, { timeout: 30_000, retryCount: 2 }) });
+const wal = createWalletClient({ chain, transport: http(RPC, { timeout: 30_000, retryCount: 2 }), account });
 const read = (fn, args = []) => pub.readContract({ address: MARKET, abi, functionName: fn, args });
 const write = async (fn, args) => {
   const hash = await wal.sendTransaction({ to: MARKET, data: encodeFunctionData({ abi, functionName: fn, args }) });
@@ -204,9 +216,10 @@ createServer(async (req, res) => {
 }).listen(PORT, () => console.log(`[serve] ${PUBLIC_URL}/lease/:id`));
 
 // ------------------------------------------------------------------- loop
-const tick = async (name, fn) => { try { await fn(); } catch (e) { console.error(`[${name}]`, e.message); } };
+const tick = async (name, fn) => { try { await fn(); return true; } catch (e) { console.error(`[${name}]`, e.message.split("\n")[0]); return false; } };
 console.log(`relay ${account.address} on ${MARKET}, margin ${MARGIN * 100}%`);
-await tick("sync", sync);
-setInterval(() => tick("sync", sync), SYNC_MIN * 60_000);
+// a failed sync (RPC stall, Vast hiccup) retries in 2 minutes, not an hour
+const syncLoop = async () => { const ok = await tick("sync", sync); setTimeout(syncLoop, (ok ? SYNC_MIN : 2) * 60_000); };
+await syncLoop();
 setInterval(() => tick("watch", watch), 15_000);
 setInterval(() => tick("settle", settle), 60_000);
