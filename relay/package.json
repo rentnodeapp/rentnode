@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Fulfils Rentnode leases with real Vast.ai instances and mirrors Vast's catalogue onto the shelf.",
-  "scripts": { "start": "node index.mjs" },
-  "dependencies": { "viem": "^2.21.0" }
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "viem": "^2.21.0",
+    "ws": "^8.21.3"
+  }
 }

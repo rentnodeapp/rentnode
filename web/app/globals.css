@@ -637,3 +637,13 @@ em { font-style: italic; }
 @media (max-width: 760px) { .tok-r { margin-left: 0; width: 100%; } .tok-ca { width: 100%; } .tok-ca code { flex: 1; } }
 
 .mcard-chips span.arch { border-color: rgba(201,242,122,.4); color: var(--mint); background: rgba(201,242,122,.08); }
+
+/* probe grid and the in-console terminal */
+.probe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: rgba(201,242,122,.1); }
+@media (max-width: 640px) { .probe { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.probe > div { background: var(--panel); padding: 12px 14px; min-width: 0; }
+.probe span { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); }
+.probe b { display: block; margin-top: 5px; font-family: var(--mono); font-size: 12.5px; font-weight: 500; color: var(--ink); overflow-wrap: anywhere; }
+.term-wrap { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+.term-box { height: 380px; border: var(--rule); border-radius: 14px; background: #02120a; padding: 10px; overflow: hidden; }
+.term-box .xterm { height: 100%; }

@@ -8,6 +8,7 @@ import { MARKET, USDG, USDG_DECIMALS, KINDS, marketAbi, erc20ApproveAbi, humanDu
 import type { Listing, Lease } from "../api/market/route.ts";
 import { Icon, Mark, Arrow } from "../icons.tsx";
 import { Typed } from "../type.tsx";
+import { Terminal, Probe } from "../term.tsx";
 import { SITE_URL, DOCS_URL } from "../../src/site.ts";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
@@ -398,6 +399,7 @@ function Detail({ l, back, fmt, busy, setBusy, send, done, fail, wallet, usdg }:
               <div className="spec" key={i}><span>{["Hardware", "Memory", "Region", "Extra"][i]}</span><b>{p}</b></div>
             ))}
           </div>
+          {/\/lease\/?$/.test(l.endpoint) && <div style={{ marginTop: 16 }}><Probe listingId={l.id} endpoint={l.endpoint} /></div>}
           <div className="card" style={{ marginTop: 16 }}>
             <div className="card-head"><span className="k">What the chain guarantees</span><span className="chip warn">off-chain hardware</span></div>
             <div className="card-pad">
@@ -537,6 +539,7 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
                     <button className="btn sm" disabled={!!busy} onClick={() => act("Closing…", "close", l.id)}>{busy ?? "Stop & refund"}</button>
                   </div>
                   {/^https?:\/\//.test(l.endpoint) && <Access l={l} wallet={wallet} />}
+                  {/\/lease\/?$/.test(l.endpoint) && <Terminal leaseId={l.id} endpoint={l.endpoint} wallet={wallet} />}
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <b style={{ fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{fmt(l.refundable)}</b>

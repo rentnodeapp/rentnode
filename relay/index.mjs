@@ -21,7 +21,8 @@
 
 import { createServer } from "node:http";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
+import { WebSocketServer } from "ws";
 import { createPublicClient, createWalletClient, http, parseUnits, encodeFunctionData, verifyMessage, formatUnits } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
@@ -197,23 +198,94 @@ async function settle() {
 }
 
 // ------------------------------------------------------------------ serve
-// GET /lease/:id  with headers x-sig and x-msg, where msg = "rentnode lease <id> <unix minute>"
-createServer(async (req, res) => {
-  const m = req.url.match(/^\/lease\/(\d+)$/);
+// GET /lease/:id   headers x-sig, x-msg where msg = "rentnode lease <id> <unix minute>"
+// GET /probe/:listingId   live stats of the Vast offer behind a listing, no auth
+// WS  /term/:leaseId?msg=&sig=   a shell on the instance, same signature as /lease
+
+/** Is (msg, sig) a fresh signature by the renter of lease `id`? Returns the
+ *  lease or an {code, error}. Shared by the access endpoint and the terminal. */
+async function renterOf(id, msg, sig) {
+  if (!sig || !msg || !msg.startsWith(`rentnode lease ${id} `)) return { code: 400, error: "sign 'rentnode lease <id> <unix minute>' with the renting wallet" };
+  if (Math.abs(Date.now() / 60000 - Number(msg.split(" ").pop())) > 5) return { code: 401, error: "signature expired" };
+  const l = await read("leaseAt", [BigInt(id)]).catch(() => null);
+  if (!l) return { code: 404, error: "no such lease" };
+  if (!(await verifyMessage({ address: l.renter, message: msg, signature: sig }))) return { code: 403, error: "not the renter" };
+  return { lease: l };
+}
+
+// probe results are cached a minute so a busy detail page cannot hammer Vast
+const probeCache = new Map();
+async function probe(listingId) {
+  const hit = probeCache.get(listingId);
+  if (hit && Date.now() - hit.at < 60_000) return hit.data;
+  const key = Object.entries(state.listings).find(([, lid]) => lid === listingId)?.[0];
+  const c = CATALOG.find((x) => x.key === key);
+  if (!c) return null;
+  const o = await cheapestOffer(c);
+  const data = !o ? { available: false } : {
+    available: true, gpu: o.gpu_name, vram_gb: Math.round(o.gpu_ram / 1024), gpus: o.num_gpus,
+    cpu: o.cpu_name, cores: Math.round(o.cpu_cores_effective ?? o.cpu_cores ?? 0), ram_gb: Math.round((o.cpu_ram ?? 0) / 1024), disk_gb: Math.round(o.disk_space ?? 0),
+    down_mbps: Math.round(o.inet_down ?? 0), up_mbps: Math.round(o.inet_up ?? 0), reliability: Math.round((o.reliability2 ?? 0) * 1000) / 10,
+    dlperf: Math.round(o.dlperf ?? 0), cuda: o.cuda_max_good, driver: o.driver_version, region: o.geolocation, verified: o.verification === "verified" || !!o.verified,
+    vast_usd_hr: Math.round(o.dph_total * 1000) / 1000, checked_at: new Date().toISOString(),
+  };
+  probeCache.set(listingId, { at: Date.now(), data });
+  return data;
+}
+
+const server = createServer(async (req, res) => {
   const json = (code, body) => { res.writeHead(code, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "x-sig,x-msg" }); res.end(JSON.stringify(body)); };
   if (req.method === "OPTIONS") return json(204, {});
+  const p = req.url.match(/^\/probe\/(\d+)$/);
+  if (p) {
+    const data = await probe(Number(p[1])).catch((e) => ({ error: e.message }));
+    return json(data ? 200 : 404, data ?? { error: "not a relay listing" });
+  }
+  const m = req.url.match(/^\/lease\/(\d+)$/);
   if (!m) return json(200, { relay: "rentnode", provider: account.address, listings: state.listings });
-  const id = m[1], sig = req.headers["x-sig"], msg = req.headers["x-msg"];
-  if (!sig || !msg || !msg.startsWith(`rentnode lease ${id} `)) return json(400, { error: "sign 'rentnode lease <id> <unix minute>' with the renting wallet" });
-  if (Math.abs(Date.now() / 60000 - Number(msg.split(" ").pop())) > 5) return json(401, { error: "signature expired" });
-  const l = await read("leaseAt", [BigInt(id)]).catch(() => null);
-  if (!l) return json(404, { error: "no such lease" });
-  if (!(await verifyMessage({ address: l.renter, message: msg, signature: sig }))) return json(403, { error: "not the renter" });
+  const id = m[1];
+  const r = await renterOf(id, req.headers["x-msg"], req.headers["x-sig"]);
+  if (r.error) return json(r.code, { error: r.error });
   const v = state.leases[id];
   if (!v?.instanceId) return json(409, { error: v?.failed ?? "not provisioned yet" });
   if (!v.ssh) return json(202, { status: "booting", retryIn: 30 });
   return json(200, { ...v.ssh, privateKey: sshKeypair(id).priv, note: "ssh -i key -p PORT root@HOST" });
-}).listen(PORT, () => console.log(`[serve] ${PUBLIC_URL}/lease/:id`));
+});
+
+// ---------------------------------------------------------------- terminal
+// The browser speaks xterm over a websocket; the relay runs the system ssh
+// with the lease's own key and pipes bytes both ways. No pty library: -tt
+// makes the remote side allocate one. Text frames are keystrokes, and a
+// frame starting with \x01 carries "cols rows" for a resize.
+const wss = new WebSocketServer({ noServer: true });
+server.on("upgrade", async (req, sock, head) => {
+  const u = new URL(req.url, "http://x");
+  const m = u.pathname.match(/^\/term\/(\d+)$/);
+  const deny = (code, text) => { sock.write(`HTTP/1.1 ${code} ${text}\r\n\r\n`); sock.destroy(); };
+  if (!m) return deny(404, "Not Found");
+  const id = m[1];
+  const r = await renterOf(id, u.searchParams.get("msg"), u.searchParams.get("sig"));
+  if (r.error) return deny(r.code, r.error);
+  if (r.lease.closedAt !== 0n) return deny(410, "lease closed");
+  const v = state.leases[id];
+  if (!v?.ssh) return deny(409, "not ready");
+  wss.handleUpgrade(req, sock, head, (ws) => {
+    const keyFile = `${DATA}/lease-${id}`;
+    const ssh = spawn("ssh", ["-tt", "-i", keyFile, "-p", String(v.ssh.port), "-o", "StrictHostKeyChecking=no", "-o", `UserKnownHostsFile=${process.platform === "win32" ? "NUL" : "/dev/null"}`, "-o", "LogLevel=ERROR", `${v.ssh.user}@${v.ssh.host}`]);
+    const out = (d) => { if (ws.readyState === ws.OPEN) ws.send(d); };
+    ssh.stdout.on("data", out); ssh.stderr.on("data", out);
+    ssh.on("close", (code) => { out(`\r\n[connection closed${code ? ` (${code})` : ""}]\r\n`); ws.close(); });
+    ws.on("message", (d) => {
+      const s = d.toString();
+      if (s.charCodeAt(0) === 1) { const [c, r_] = s.slice(1).split(" "); ssh.stdin.write(`stty cols ${Number(c) || 100} rows ${Number(r_) || 30}\n`); return; }
+      ssh.stdin.write(s);
+    });
+    ws.on("close", () => ssh.kill());
+    console.log(`[term] lease #${id} shell opened`);
+  });
+});
+
+server.listen(PORT, () => console.log(`[serve] ${PUBLIC_URL}/lease/:id  /probe/:listingId  ws /term/:leaseId`));
 
 // ------------------------------------------------------------------- loop
 const tick = async (name, fn) => { try { await fn(); return true; } catch (e) { console.error(`[${name}]`, e.message.split("\n")[0]); return false; } };
