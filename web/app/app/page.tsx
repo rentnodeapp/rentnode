@@ -260,6 +260,28 @@ function MachineTable({ rows, pick, fmt, compact }: { rows: Listing[]; pick: (i:
   );
 }
 
+/* What kind of GPU a name is. The contract only knows "GPU"; the tier and the
+   architecture are read off the model name so a card says more than the enum. */
+const GPU_META: [RegExp, string, string][] = [
+  [/\bRTX 50\d0\b/i, "Blackwell", "Consumer"],
+  [/\bB200\b/i, "Blackwell", "Datacenter"],
+  [/\bH100\b|\bH200\b/i, "Hopper", "Datacenter"],
+  [/\bL40S?\b|\bL4\b|\b6000 ?Ada\b/i, "Ada", "Workstation"],
+  [/\bRTX 40\d0\b/i, "Ada", "Consumer"],
+  [/\bA100\b|\bA10\b|\bA40\b/i, "Ampere", "Datacenter"],
+  [/\bRTX A\d{4}\b/i, "Ampere", "Workstation"],
+  [/\bRTX 30\d0\b/i, "Ampere", "Consumer"],
+  [/\bRTX 20\d0\b/i, "Turing", "Consumer"],
+  [/\bT4\b/i, "Turing", "Datacenter"],
+  [/\bV100\b/i, "Volta", "Datacenter"],
+  [/\bP100\b|\bP40\b/i, "Pascal", "Datacenter"],
+  [/\bGTX 10\d0\b|\bP\d{4}\b/i, "Pascal", "Consumer"],
+];
+function gpuMeta(name: string): { arch: string; tier: string } | null {
+  const hit = GPU_META.find(([re]) => re.test(name));
+  return hit ? { arch: hit[1], tier: hit[2] } : null;
+}
+
 /* The shelf as cards: art, name, the spec split into chips, and one price
    that reads before anything else. */
 function MachineCards({ rows, pick, fmt }: { rows: Listing[]; pick: (i: number) => void; fmt: (n: number) => string }) {
@@ -269,15 +291,19 @@ function MachineCards({ rows, pick, fmt }: { rows: Listing[]; pick: (i: number) 
       {rows.map((l, i) => {
         const parts = l.spec.split("/").map((s) => s.trim()).filter(Boolean);
         const name = parts[0] || KINDS[l.kind];
+        const meta = l.kind === 0 ? gpuMeta(name) : null;
         return (
           <button key={l.id} className={`mcard${l.open ? "" : " closed"}`} onClick={() => pick(l.id)}>
             <div className="mcard-top">
-              <span className="mcard-kind">{KINDS[l.kind]} · #{l.id}</span>
+              <span className="mcard-kind">{meta ? `${meta.tier} GPU` : KINDS[l.kind]} · #{l.id}</span>
               <span className={`mcard-status ${l.open ? "ok" : "off"}`}><i />{l.open ? "Available" : "Closed"}</span>
             </div>
             <div className="mcard-art"><Icon kind={l.kind} size={64} i={i} /></div>
             <h4>{name}</h4>
-            <div className="mcard-chips">{parts.slice(1).map((p) => <span key={p}>{p}</span>)}</div>
+            <div className="mcard-chips">
+              {meta && <span className="arch">{meta.arch}</span>}
+              {parts.slice(1).map((p) => <span key={p}>{p}</span>)}
+            </div>
             <div className="mcard-foot">
               <div className="mcard-price"><b>{fmt(l.pricePerHour)}</b><span>USDG / hr · {(l.pricePerHour / 3600).toFixed(6)} per sec</span></div>
               <span className="btn primary sm">Rent →</span>
