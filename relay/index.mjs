@@ -287,6 +287,24 @@ server.on("upgrade", async (req, sock, head) => {
 
 server.listen(PORT, () => console.log(`[serve] ${PUBLIC_URL}/lease/:id  /probe/:listingId  ws /term/:leaseId`));
 
+// ------------------------------------------------------------ zookr ping
+// GitHub's cron is best-effort and often skips; while this process is up it
+// dispatches the Zookr rounds workflow every ten minutes. Optional.
+const ZOOKR_TOKEN = env("ZOOKR_GITHUB_TOKEN");
+if (ZOOKR_TOKEN) {
+  const ping = async () => {
+    try {
+      const r = await fetch("https://api.github.com/repos/zookrfamily/zookr/actions/workflows/rounds.yml/dispatches", {
+        method: "POST", headers: { Authorization: `Bearer ${ZOOKR_TOKEN}`, Accept: "application/vnd.github+json", "Content-Type": "application/json", "User-Agent": "rentnode-relay" },
+        body: JSON.stringify({ ref: "main", inputs: { dry: false } }),
+      });
+      if (r.status !== 204) console.warn(`[zookr] dispatch ${r.status}: ${(await r.text()).slice(0, 120)}`);
+    } catch (e) { console.warn("[zookr] dispatch:", e.message); }
+  };
+  setInterval(ping, 10 * 60_000);
+  console.log("[zookr] rounds dispatcher armed (every 10 min)");
+}
+
 // ------------------------------------------------------------------- loop
 const tick = async (name, fn) => { try { await fn(); return true; } catch (e) { console.error(`[${name}]`, e.message.split("\n")[0]); return false; } };
 console.log(`relay ${account.address} on ${MARKET}, margin ${MARGIN * 100}%`);
