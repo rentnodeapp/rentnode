@@ -535,7 +535,7 @@ function Leases({ leases, fmt, busy, setBusy, send, done, fail, wallet }: Common
                       <input type="number" min="0" placeholder="Top up" value={topping[l.id] ?? ""} onChange={(e) => setTopping((t) => ({ ...t, [l.id]: e.target.value }))} style={{ fontSize: 13 }} />
                       <span className="unit">USDG</span>
                     </div>
-                    <button className="btn sm" disabled={!!busy || !(Number(topping[l.id]) > 0)} onClick={() => top(l.id)}>Add</button>
+                    <button className="btn sm" disabled={!!busy || l.runway === 0 || !(Number(topping[l.id]) > 0)} title={l.runway === 0 ? "This lease ran out of funding: close it and rent again" : undefined} onClick={() => top(l.id)}>Add</button>
                     <button className="btn sm" disabled={!!busy} onClick={() => act("Closing…", "close", l.id)}>{busy ?? "Stop & refund"}</button>
                   </div>
                   {/^https?:\/\//.test(l.endpoint) && <Access l={l} wallet={wallet} />}
