@@ -149,6 +149,13 @@ contract ComputeMarket is ReentrancyGuard {
         Lease storage ls = _leaseAt(leaseId);
         if (ls.closedAt != 0) revert AlreadyClosed();
         if (amount == 0) revert BadAmount();
+        // A lease that ran dry stopped earning when its funding ran out. Move the clock
+        // past the unfunded stretch so the top-up buys runway from now, not arrears.
+        uint256 elapsed = block.timestamp - ls.startAt;
+        if ((uint256(ls.pricePerHour) * elapsed) / 3600 > ls.funded) {
+            uint256 fundedSecs = (uint256(ls.funded) * 3600 + ls.pricePerHour - 1) / ls.pricePerHour;
+            ls.startAt = uint64(block.timestamp - fundedSecs);
+        }
         usdg.safeTransferFrom(msg.sender, address(this), amount);
         ls.funded += amount;
         emit ToppedUp(leaseId, amount);
